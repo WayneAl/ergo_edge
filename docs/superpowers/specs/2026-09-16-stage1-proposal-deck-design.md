@@ -32,7 +32,8 @@ Non-goals: prototype code and the 3-min video (sub-project 2, own spec); filling
   no `TODO` left; `make png` → one PNG per page for visual review.
 
 ## Invariants & failure modes
-- A slide that overflows prints as an extra page → `make check` fails with expected vs actual page count.
+- Slides clip (`overflow: hidden`), so overflow never adds a page: `make check` measures every element in
+  headless Chrome against the safe area (bottom 1000 px, right 1824 px) and fails naming the slide.
 - English only (contest rule) → CJK check fails loud; Chinese stays in `claims.md` notes only.
 - Technical honesty on slides 6/12: 2D COCO-17 cannot see wrist flexion, load or coupling. Wrist → crop +
   `hand_landmark_lite` (has a Hailo `.hef`) or a station default; load/coupling → set per station at

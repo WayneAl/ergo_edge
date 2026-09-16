@@ -51,7 +51,7 @@
       </div>
     </div>
   </div>
-  <p class="closer">Work-related musculoskeletal disorders (WMSDs) are the largest category of occupational disease claims.</p>
+  <p class="closer">In 2025, 57 % of Taiwan’s occupational-disease insurance benefits were for musculoskeletal disorders; in manufacturing, 64 %.<sup class="ref">R22</sup></p>
   <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">2 / 18</span></div>
 </section>
 
@@ -63,17 +63,17 @@
     <div class="pillar">
       <p class="label">Law</p>
       <div class="display">Art. 6 ¶2<small>Occupational Safety and Health Act, Taiwan<sup class="ref">R7</sup></small></div>
-      <p>Employers must identify and control workplace hazards, including ergonomic hazards. Control needs evidence that outlasts one visit.</p>
+      <p>Employers must plan and take measures to prevent musculoskeletal disorders caused by repetitive work. Proving that takes more than one visit.</p>
     </div>
     <div class="pillar">
       <p class="label">Insurance</p>
-      <div class="display">Experience rating<small>Occupational accident insurance, Taiwan<sup class="ref">R8</sup></small></div>
-      <p>Premiums follow the accident record: a lower accident rate earns a lower premium. Evidence of control has a price.</p>
+      <div class="display">Experience rating<small>Occupational Accident Insurance and Protection Act, Art. 16, Taiwan<sup class="ref">R8</sup></small></div>
+      <p>Above a size threshold, the premium follows three years of claims and the employer’s safety and health record. Evidence of control has a price.</p>
     </div>
     <div class="pillar">
       <p class="label">Labour</p>
-      <div class="display">251 deaths<small>in major occupational accidents, Taiwan 2025, down from 287 in 2024<sup class="ref">R6</sup></small></div>
-      <p>The trend is improving. Plants that cannot hire more OSH staff need more coverage per head, not more clipboards.</p>
+      <div class="display">259 deaths<small>in major occupational accidents, Taiwan 2025 (revised Feb 2026), 287 in 2024<sup class="ref">R6</sup></small></div>
+      <p>Deaths fell overall but rose in manufacturing, from 56 to 62. OSHA’s 2026 action plan encourages technology-based prevention in plants.</p>
     </div>
   </div>
   <p class="closer">One system answers all three: continuous evidence of control at every station, without adding headcount.</p>
@@ -580,7 +580,7 @@
 
 <!-- ============================== 14 ROI ============================== -->
 <section class="slide">
-  <h1>One station pays back in under a year even if we are half wrong.</h1>
+  <h1>One station pays back within a year, even in the conservative case.</h1>
   <div class="head-gap"></div>
   <div class="cols" style="grid-template-columns: 690px 1fr; gap: 80px;">
     <div>
@@ -595,14 +595,14 @@
         </tbody>
       </table>
       <div class="panel mt-m">
-        <p style="margin:0"><strong>Half wrong?</strong> If the base-case benefit is only half as large, payback is <span class="nw">8.0 months<span class="est">team estimate</span>.</span></p>
+        <p style="margin:0"><strong>Stress test.</strong> Halve the benefit: <span class="nw">8.0 months<span class="est">team estimate</span></span> in the base case, <span class="nw">19.0 months<span class="est">team estimate</span></span> in the conservative case.</p>
       </div>
     </div>
     <div>
       <h2>Annual benefit per station (NT$) and payback<span class="est">team estimate</span></h2>
       <svg width="958" height="318" viewBox="0 0 958 318" role="img" aria-label="Annual benefit: conservative 75,858, base 177,922, optimistic 384,589 NT$">
-        <path class="f-soft" d="M0 272 V229.2 Q0 225.2 4 225.2 H313.3 Q317.3 225.2 317.3 229.2 V272 Z"/>
-        <path class="f-mid" d="M319.3 272 V164.4 Q319.3 160.4 323.3 160.4 H634.7 Q638.7 160.4 638.7 164.4 V272 Z"/>
+        <path class="f-c1" d="M0 272 V229.2 Q0 225.2 4 225.2 H313.3 Q317.3 225.2 317.3 229.2 V272 Z"/>
+        <path class="f-c2" d="M319.3 272 V164.4 Q319.3 160.4 323.3 160.4 H634.7 Q638.7 160.4 638.7 164.4 V272 Z"/>
         <path class="f-blue" d="M640.7 272 V50 Q640.7 46 644.7 46 H954 Q958 46 958 50 V272 Z"/>
         <line x1="0" y1="272" x2="958" y2="272" stroke="var(--ink)" stroke-width="2"/>
         <text x="158.7" y="211" class="t-mid t-28 t-b">75,858</text>
@@ -627,63 +627,58 @@
 
 <!-- ============================== 15 Competition ============================== -->
 <section class="slide">
-  <h1>Cloud video tools assess a clip; we watch the station.</h1>
+  <h1>Continuous like camera analytics, and the footage never leaves the station.</h1>
   <div class="head-gap"></div>
-  <table class="cmp">
+  <table class="cmp cmp5">
     <thead>
       <tr>
         <th></th>
         <th class="hl">LineSafe</th>
-        <th>Cloud video assessment<span class="who">CerebrumEdge ErgoEdge, TuMeke, VelocityEHS<sup class="ref">R16–R18</sup></span></th>
-        <th>Wearables<span class="who">Soter Analytics<sup class="ref">R19</sup></span></th>
+        <th>Clip assessment apps<span class="who">CerebrumEdge ErgoEdge, TuMeke, VelocityEHS<sup class="ref">R16–R18</sup></span></th>
+        <th>Camera safety analytics<span class="who">Voxel<sup class="ref">R23</sup></span></th>
+        <th>Wearables<span class="who">SoterCoach<sup class="ref">R19</sup></span></th>
         <th>Paper REBA</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td>Coverage</td><td class="hl"><b>Continuous</b></td><td>Sampled clips</td><td>Continuous, while worn</td><td>Sampled visit</td></tr>
-      <tr><td>Video leaves the site</td><td class="hl"><b>No</b></td><td>Yes</td><td>No video</td><td>No video</td></tr>
-      <tr><td>Worker wears a device</td><td class="hl"><b>No</b></td><td>No</td><td>Yes</td><td>No</td></tr>
-      <tr><td>Cost grows with</td><td class="hl"><b>Stations</b></td><td>Clips filmed</td><td>Workers</td><td>Assessor hours</td></tr>
-      <tr><td>Explains the score by angle</td><td class="hl"><b>Yes</b>, with time and duration</td><td>Yes, per clip</td><td>Partial</td><td>Yes, on the sheet</td></tr>
-      <tr><td>Works offline</td><td class="hl"><b>Yes</b></td><td>No</td><td>Partial</td><td>Yes</td></tr>
+      <tr><td>How it sees work</td><td class="hl"><b>A fixed camera</b> at the station</td><td>Someone films a task with a phone or app</td><td>Existing CCTV cameras</td><td>A motion sensor worn on the spine or shoulder</td><td>An assessor watches</td></tr>
+      <tr><td>Coverage</td><td class="hl"><b>Continuous</b></td><td>The clips that were filmed</td><td>Continuous</td><td>Continuous, while worn</td><td>One visit</td></tr>
+      <tr><td>Where the data goes</td><td class="hl"><b>Stays on the station PC</b>; only the skeleton is kept</td><td>Video uploaded to a cloud server for scoring (ErgoEdge)</td><td>Edge appliance, then the vendor cloud; flagged footage shared for review</td><td>Sensor data to a supervisor dashboard</td><td>A filing cabinet</td></tr>
+      <tr><td>What the manager gets</td><td class="hl"><b>REBA/RULA over time</b>, with the angle that caused each score</td><td>REBA, RULA, NIOSH and other method reports per clip</td><td>Flagged unsafe events, including risky lifting</td><td>Worker alerts and movement data</td><td>A score on a sheet</td></tr>
     </tbody>
   </table>
-  <p class="footnote">Vendor columns: vendor claims, from public sites, 2026<sup class="ref">R16–R19</sup>. LineSafe column: our design, to be validated in Stage II (slide 13).</p>
+  <p class="footnote">Vendor columns summarise each vendor’s public product page or press coverage, September 2026; where clip apps differ, ErgoEdge is described. LineSafe column: our design, validated in Stage II (slide 13).</p>
   <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">15 / 18</span></div>
 </section>
 
 <!-- ============================== 16 Roadmap and risks ============================== -->
 <section class="slide">
-  <h1>Twelve weeks from finalist notice to a pilot station.</h1>
-  <p class="lede" style="margin-bottom:24px">Plan by week after the finalist notice<span class="est">team estimate</span>. The finals fall in week 8 (19 Dec 2026)<sup class="ref">R21</sup>.</p>
-  <svg width="1728" height="266" viewBox="0 0 1728 266" role="img" aria-label="Weeks 1-2 bring-up, 3-6 scoring engine, 7-9 product surface, 10-12 validation; finals in week 8">
-    <rect class="box-soft" x="0" y="40" width="284" height="70" rx="4"/>
-    <rect class="box-soft" x="288" y="40" width="572" height="70" rx="4"/>
-    <rect class="box-soft" x="864" y="40" width="428" height="70" rx="4"/>
-    <rect class="box-blue" x="1296" y="40" width="432" height="70" rx="4"/>
+  <h1>Eight weeks from finalist notice to a validated station on the finals stage.</h1>
+  <p class="lede" style="margin-bottom:24px">Dates are the contest calendar<sup class="ref">R21</sup>; what we build in each phase is our <span class="nw">plan<span class="est">team estimate</span>.</span></p>
+  <svg width="1728" height="258" viewBox="0 0 1728 258" role="img" aria-label="26 Oct to 5 Nov bring-up; 6 to 19 Nov scoring on the device; 20 Nov to 4 Dec product and evidence; 5 to 19 Dec finals, slides due 10 Dec">
+    <rect class="box-soft" x="0" y="40" width="341" height="70" rx="4"/>
+    <rect class="box-soft" x="345" y="40" width="436" height="70" rx="4"/>
+    <rect class="box-soft" x="785" y="40" width="467" height="70" rx="4"/>
+    <rect class="box-blue" x="1256" y="40" width="472" height="70" rx="4"/>
     <text x="16" y="84" class="t-26 t-b"><tspan class="t-blue">1</tspan>  Bring-up</text>
-    <text x="304" y="84" class="t-26 t-b"><tspan class="t-blue">2</tspan>  Scoring engine</text>
-    <text x="880" y="84" class="t-26 t-b"><tspan class="t-blue">3</tspan>  Product surface</text>
-    <text x="1312" y="84" class="t-26 t-b t-white">4  Validation</text>
-    <path class="ln-thick" d="M1121 30 V120"/>
-    <text x="1121" y="22" class="t-mid t-22 t-b">Finals</text>
-    <g class="t-20 t-muted">
-      <text x="72" y="146" class="t-mid t-20 t-muted">Week 1</text><text x="216" y="146" class="t-mid t-20 t-muted">2</text>
-      <text x="360" y="146" class="t-mid t-20 t-muted">3</text><text x="504" y="146" class="t-mid t-20 t-muted">4</text>
-      <text x="648" y="146" class="t-mid t-20 t-muted">5</text><text x="792" y="146" class="t-mid t-20 t-muted">6</text>
-      <text x="936" y="146" class="t-mid t-20 t-muted">7</text><text x="1080" y="146" class="t-mid t-20 t-muted">8</text>
-      <text x="1224" y="146" class="t-mid t-20 t-muted">9</text><text x="1368" y="146" class="t-mid t-20 t-muted">10</text>
-      <text x="1512" y="146" class="t-mid t-20 t-muted">11</text><text x="1656" y="146" class="t-mid t-20 t-muted">12</text>
-    </g>
-    <text x="16" y="190" class="t-24">Pose FPS and</text>
-    <text x="16" y="218" class="t-24">.hef decode on the</text>
-    <text x="16" y="246" class="t-24">provided UGen300<tspan class="t-blue t-20" dy="-9"> R21</tspan></text>
-    <text x="304" y="190" class="t-24">REBA/RULA engine, live overlay,</text>
-    <text x="304" y="218" class="t-24">SQLite events</text>
-    <text x="880" y="190" class="t-24">Dashboard, weekly LLM report,</text>
-    <text x="880" y="218" class="t-24">one-command installer</text>
-    <text x="1312" y="190" class="t-24">κ study and 7 × 24 h soak</text>
-    <text x="1312" y="218" class="t-24">→ evidence for a pilot station</text>
+    <text x="361" y="84" class="t-26 t-b"><tspan class="t-blue">2</tspan>  Scoring on the device</text>
+    <text x="801" y="84" class="t-26 t-b"><tspan class="t-blue">3</tspan>  Product and evidence</text>
+    <text x="1272" y="84" class="t-26 t-b t-white">4  Finals</text>
+    <path class="ln-thick" d="M1414 30 V120"/>
+    <text x="1414" y="22" class="t-mid t-22 t-b">Slides due 10 Dec</text>
+    <text x="1728" y="22" class="t-end t-22 t-b">Finals 19 Dec</text>
+    <text x="0" y="146" class="t-20 t-muted">26 Oct: finalists named, units ship</text>
+    <text x="345" y="146" class="t-20 t-muted">6 Nov: development opens</text>
+    <text x="785" y="146" class="t-20 t-muted">20 Nov</text>
+    <text x="1256" y="146" class="t-20 t-muted">4 Dec: development closes</text>
+    <text x="0" y="192" class="t-24">HailoRT install, pose .hef</text>
+    <text x="0" y="220" class="t-24">decode, FPS per stream</text>
+    <text x="345" y="192" class="t-24">REBA/RULA engine, live</text>
+    <text x="345" y="220" class="t-24">overlay, SQLite events</text>
+    <text x="785" y="192" class="t-24">Dashboard, weekly LLM report;</text>
+    <text x="785" y="220" class="t-24">κ study and a 7-day soak</text>
+    <text x="1256" y="192" class="t-24">Finals slides, then a live</text>
+    <text x="1256" y="220" class="t-24">demo at ASUS headquarters</text>
   </svg>
   <div class="cols mt-s" style="grid-template-columns: 1fr 560px; gap: 72px;">
     <table class="risks">
@@ -697,7 +692,7 @@
     </table>
     <div class="panel">
       <h2>The ask</h2>
-      <p style="margin:0">A pilot station on an ASUS-owned line or an ASUS ODM partner line during Stage II<sup class="ref">R20</sup>.</p>
+      <p style="margin:0">After the finals, a pilot station on an ASUS-owned line or an ASUS ODM partner line<sup class="ref">R20</sup>.</p>
     </div>
   </div>
   <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">16 / 18</span></div>
@@ -705,7 +700,7 @@
 
 <!-- ============================== 17 Team ============================== -->
 <section class="slide">
-  <h1>One builder, full stack, from Move contracts to pose pipelines.</h1>
+  <h1>One builder, full stack, from production backends to pose pipelines.</h1>
   <div class="head-gap"></div>
   <p class="team-name mt-m">TEAM_NAME</p>
   <div class="members">
@@ -722,29 +717,31 @@
 <section class="slide">
   <h1>References</h1>
   <ol class="refs rn">
-    <li>ASUS, UGen300 USB AI Accelerator — specifications and price. <span class="url">https://www.asus.com/<wbr>tw/<wbr>motherboards-components/<wbr>ai-accelerator/<wbr>ugen/<wbr>ugen300-usb-8g/<wbr>techspec/<wbr></span></li>
-    <li>CNX Software, ASUS UGen300 USB AI accelerator (Hailo-10H, 8 GB), 3 Aug 2026. <span class="url">https://cnx-software.com/<wbr>2026/<wbr>08/<wbr>03/<wbr>299-99-asus-ugen300-usb-ai-accelerator-hailo-10h-8gb-lpddr4</span></li>
-    <li>Hailo Model Zoo, compiled models v5.4.0 for Hailo-10H (yolov8m_pose, hand_landmark_lite). <span class="url">https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/<wbr>ModelZoo/<wbr>Compiled/<wbr>v5.4.0/<wbr>hailo10h/<wbr></span></li>
-    <li>Hailo Model Zoo GenAI v5.3.0, model specifications (MODELS.rst). <span class="url">https://raw.githubusercontent.com/<wbr>hailo-ai/<wbr>hailo_model_zoo_genai/<wbr>main/<wbr>docs/<wbr>MODELS.rst</span></li>
-    <li>LLM Inference at the Edge — Raspberry Pi 5 with Hailo-10H. arXiv 2603.23640, 2026. <span class="url">https://arxiv.org/html/2603.23640v1</span></li>
-    <li>Ministry of Labor and Occupational Safety and Health Administration, Taiwan — major occupational accident statistics 2025 (ROC 114); minimum wage announcement, 21 Oct 2025.</li>
-    <li>Occupational Safety and Health Act (Taiwan), Article 6, paragraph 2.</li>
-    <li>Occupational Accident Insurance and Protection Act (Taiwan) — experience-rated premiums.</li>
-    <li>Grant Thornton, 2026 AI Impact Survey (manufacturing), via LINE Today. <span class="url">https://today.line.me/<wbr>tw/<wbr>v3/<wbr>article/<wbr>GgraBR7</span></li>
+    <li>ASUS, UGen300 USB AI Accelerator — specifications and price. <a class="url" href="https://www.asus.com/tw/motherboards-components/ai-accelerator/ugen/ugen300-usb-8g/techspec/">www.asus.com/<wbr>tw/<wbr>motherboards-components/<wbr>ai-accelerator/<wbr>ugen/<wbr>ugen300-usb-8g/<wbr>techspec/<wbr></a></li>
+    <li>CNX Software, ASUS UGen300 USB AI accelerator (Hailo-10H, 8 GB), 3 Aug 2026. <a class="url" href="https://cnx-software.com/2026/08/03/299-99-asus-ugen300-usb-ai-accelerator-hailo-10h-8gb-lpddr4">cnx-software.com/<wbr>2026/<wbr>08/<wbr>03/<wbr>299-99-asus-ugen300-usb-ai-accelerator-hailo-10h-8gb-lpddr4</a></li>
+    <li>Hailo Model Zoo, compiled models v5.4.0 for Hailo-10H (yolov8m_pose, hand_landmark_lite). <a class="url" href="https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v5.4.0/hailo10h/">hailo-model-zoo.s3.eu-west-2.amazonaws.com/<wbr>ModelZoo/<wbr>Compiled/<wbr>v5.4.0/<wbr>hailo10h/<wbr></a></li>
+    <li>Hailo Model Zoo GenAI v5.3.0, model specifications (MODELS.rst). <a class="url" href="https://raw.githubusercontent.com/hailo-ai/hailo_model_zoo_genai/main/docs/MODELS.rst">raw.githubusercontent.com/<wbr>hailo-ai/<wbr>hailo_model_zoo_genai/<wbr>main/<wbr>docs/<wbr>MODELS.rst</a></li>
+    <li>LLM Inference at the Edge — Raspberry Pi 5 with Hailo-10H. arXiv 2603.23640, 2026. <a class="url" href="https://arxiv.org/html/2603.23640v1">arxiv.org/<wbr>html/<wbr>2603.23640v1</a></li>
+    <li>OSHA Taiwan, 2025 major occupational fatality statistics report, updated 5 Feb 2026 (PDF). <a class="url" href="https://www.osha.gov.tw/media/b54h1fj3/114%E5%B9%B4%E9%87%8D%E5%A4%A7%E8%81%B7%E7%81%BD%E6%AD%BB%E4%BA%A1%E7%B5%B1%E8%A8%88%E5%A0%B1%E5%91%8A.pdf">osha.gov.tw/<wbr>media/<wbr>b54h1fj3/<wbr> (PDF)</a></li>
+    <li>Occupational Safety and Health Act (Taiwan), Art. 6 ¶2. <a class="url" href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0060001">law.moj.gov.tw/<wbr>LawClass/<wbr>LawAll.aspx?pcode=N0060001</a></li>
+    <li>Occupational Accident Insurance and Protection Act (Taiwan), Art. 16. <a class="url" href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=N0050031">law.moj.gov.tw/<wbr>LawClass/<wbr>LawAll.aspx?pcode=N0050031</a></li>
+    <li>Grant Thornton, 2026 AI Impact Survey (manufacturing), via LINE Today. <a class="url" href="https://today.line.me/tw/v3/article/GgraBR7">today.line.me/<wbr>tw/<wbr>v3/<wbr>article/<wbr>GgraBR7</a></li>
     <li>Hignett S., McAtamney L. Rapid Entire Body Assessment (REBA). <i>Applied Ergonomics</i> 31(2):201–205, 2000.</li>
     <li>McAtamney L., Corlett E. N. RULA: a survey method for the investigation of work-related upper limb disorders. <i>Applied Ergonomics</i> 24(2):91–99, 1993.</li>
     <li>Industrial Ergonomics Risk Analysis Based on 3D-Human Pose Estimation. <i>Electronics</i> (MDPI) 11(20):3403, 2022.</li>
     <li>Ergonomic Risk Assessment Using Human Pose Estimation. ACM, 2025. doi:10.1145/3719384.3719453</li>
     <li>Real-time ergonomic risk assessment of musculoskeletal disorders. <i>International Journal of Workplace Health Management</i> 19(4):457, Emerald.</li>
     <li>Improvements for adjustment factors of REBA and RULA (EMG-validated). ScienceDirect, PII S0169814126000673, 2026.</li>
-    <li>CerebrumEdge — ErgoEdge. <span class="url">cerebrumedge.com</span></li>
-    <li>TuMeke. <span class="url">tumeke.io</span></li>
-    <li>VelocityEHS — Industrial Ergonomics. <span class="url">velocityehs.com</span></li>
-    <li>Soter Analytics. <span class="url">soteranalytics.com</span></li>
-    <li>Pegatron — Wikipedia (ASUS manufacturing spin-off, 2008).</li>
-    <li>ASUS UGen AI League — contest rules. <span class="url">https://contest.bhuntr.com/<wbr>tw/<wbr>39jg9vimiynrhlksze/<wbr>home/<wbr></span></li>
+    <li>CerebrumEdge — ErgoEdge product page. <a class="url" href="https://cerebrumedge.com/pages/ergoedge">cerebrumedge.com/<wbr>pages/<wbr>ergoedge</a></li>
+    <li>TuMeke — product site. <a class="url" href="https://www.tumeke.io/">www.tumeke.io/<wbr></a></li>
+    <li>VelocityEHS — Industrial Ergonomics. <a class="url" href="https://www.ehs.com/solution/ergonomics/industrial-ergonomics/">www.ehs.com/<wbr>solution/<wbr>ergonomics/<wbr>industrial-ergonomics/<wbr></a></li>
+    <li>Soter Analytics — SoterCoach. <a class="url" href="https://www.soter.com/sotercoach">www.soter.com/<wbr>sotercoach</a></li>
+    <li>Pegatron — Wikipedia (spun off from ASUS in 2008). <a class="url" href="https://en.wikipedia.org/wiki/Pegatron">en.wikipedia.org/<wbr>wiki/<wbr>Pegatron</a></li>
+    <li>ASUS UGen AI League — contest rules and calendar. <a class="url" href="https://contest.bhuntr.com/tw/39jg9vimiynrhlksze/home/">contest.bhuntr.com/<wbr>tw/<wbr>39jg9vimiynrhlksze/<wbr>home/<wbr></a></li>
+    <li>MOL Bureau of Labor Insurance, occupational-disease benefit cases by cause and industry, Jan–Dec 2025 (open data). <a class="url" href="https://data.gov.tw/dataset/13332">data.gov.tw/<wbr>dataset/<wbr>13332</a></li>
+    <li>Machine Design, How Voxel combines video feeds and AI to assess workplace safety. <a class="url" href="https://www.machinedesign.com/automation-iiot/article/21274068/voxel-ai-how-voxel-combines-video-feeds-and-ai-to-assess-and-mitigate-workplace-safety">machinedesign.com/<wbr>automation-iiot/<wbr>article/<wbr>21274068/<wbr></a></li>
   </ol>
-  <p class="gh"><strong>Code:</strong> <span class="url">https://github.com/WayneAl/ergo_edge</span> — private during the contest; access granted to the jury on request.</p>
+  <p class="gh"><strong>Code:</strong> <a class="url" href="https://github.com/WayneAl/ergo_edge">github.com/WayneAl/ergo_edge</a> — private during the contest; access granted to the jury on request.</p>
   <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">18 / 18</span></div>
 </section>
 
@@ -786,7 +783,7 @@
   </table>
   <ul class="rules mt-m small">
     <li>Manual assessment today: 1 h / day of observation + 8 h / month of reporting = 38 h / month<span class="est">team estimate</span></li>
-    <li>OSH manager at NT$258.6 / h = NT$45,000 / month ÷ 174 h<span class="est">team estimate</span>; for scale, the 2026 minimum wage is NT$29,500 / month<sup class="ref">R6</sup></li>
+    <li>OSH manager at NT$258.6 / h = NT$45,000 / month ÷ 174 h<span class="est">team estimate</span></li>
     <li>Indirect cost of one WMSD incident: NT$100,000–800,000<span class="est">team estimate</span></li>
     <li>CAPEX NT$58,090; OPEX NT$1,300 / year = 14.5 W × 8,760 h at NT$3–4 / kWh (≈ NT$381–508) + 10 % of hardware<span class="est">team estimate</span></li>
     <li>Sensitivity: base-case benefit halved → payback 8.0 months<span class="est">team estimate</span></li>
