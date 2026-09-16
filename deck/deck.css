@@ -1,0 +1,121 @@
+/* LineSafe — Stage I proposal deck. 1920×1080 pages, printed by headless Chrome. */
+@import url('fonts.css');
+
+:root {
+  --paper: #F7F8F6;
+  --ink: #17202A;
+  --steel: #5B6672;
+  --rule: #C9CFD4;
+  --panel: #E9ECEE;
+  --blue: #1E56C2;
+  --blue-soft: #DCE5F7;
+  --ok: #2E8B57;
+  --warn: #D9930D;
+  --bad: #C8371B;
+  --font: 'IBM Plex Sans', system-ui, sans-serif;
+  --cond: 'IBM Plex Sans Condensed', var(--font);
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+@page { size: 1920px 1080px; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: var(--font); }
+body { font-size: 28px; line-height: 1.4; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+.slide {
+  position: relative; width: 1920px; height: 1080px; overflow: hidden;
+  padding: 88px 96px 72px; page-break-after: always; break-after: page; background: var(--paper);
+}
+.slide:last-child { page-break-after: auto; break-after: auto; }
+
+/* Screen preview: stack pages with a gap */
+@media screen { body { background: #B8BEC4; } .slide { margin: 24px auto; box-shadow: 0 2px 12px rgba(0,0,0,.25); } }
+
+/* Header block: takeaway title + one-line context */
+h1 { font-family: var(--cond); font-weight: 700; font-size: 62px; line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 14px; max-width: 1500px; }
+.lede { font-size: 30px; color: var(--steel); margin: 0 0 44px; max-width: 1400px; line-height: 1.35; }
+h2 { font-family: var(--cond); font-weight: 600; font-size: 34px; margin: 0 0 12px; }
+p { margin: 0 0 14px; }
+ul { margin: 0; padding-left: 28px; } li { margin-bottom: 10px; }
+strong { font-weight: 600; }
+small, .small { font-size: 22px; }
+.muted { color: var(--steel); }
+sup.ref { font-size: 16px; color: var(--blue); font-weight: 500; margin-left: 2px; }
+
+/* Footer: running index and section */
+.foot {
+  position: absolute; left: 96px; right: 96px; bottom: 34px;
+  display: flex; justify-content: space-between; font-size: 20px; color: var(--steel);
+}
+.foot .n { font-family: var(--cond); font-weight: 600; }
+
+/* Grid helpers */
+.cols { display: grid; gap: 48px; }
+.cols-2 { grid-template-columns: 1fr 1fr; }
+.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.cols-21 { grid-template-columns: 2fr 1fr; }
+.cols-12 { grid-template-columns: 1fr 2fr; }
+
+/* Tables: rules encode rows, no zebra */
+table { border-collapse: collapse; width: 100%; font-size: 25px; }
+th { text-align: left; font-weight: 600; padding: 10px 14px 12px; border-bottom: 3px solid var(--ink); }
+td { padding: 12px 14px; border-bottom: 1.5px solid var(--rule); vertical-align: top; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.total td { border-top: 3px solid var(--ink); border-bottom: 0; font-weight: 600; }
+
+/* Estimate marker: every 🔴 number wears this */
+.est { display: inline-block; font-size: 17px; font-weight: 500; color: var(--bad); border: 1.5px solid var(--bad); border-radius: 3px; padding: 0 6px; margin-left: 8px; vertical-align: middle; line-height: 1.5; }
+
+/* Big figure */
+.big { font-family: var(--cond); font-weight: 700; font-size: 120px; line-height: 1; letter-spacing: -0.02em; }
+.big .unit { font-size: 44px; font-weight: 600; margin-left: 8px; }
+.fig-label { font-size: 24px; color: var(--steel); margin-top: 8px; }
+
+/* Panel: a quiet box for a quote or aside */
+.panel { background: var(--panel); padding: 28px 32px; border-left: 6px solid var(--blue); }
+.panel.risk { border-left-color: var(--bad); }
+
+/* Risk ruler — the recurring motif. REBA 1–15 */
+.ruler { display: grid; grid-template-columns: repeat(15, 1fr); gap: 4px; }
+.ruler span { height: 22px; border-radius: 2px; }
+.ruler .b1 { background: #9CC9A8; } .ruler .b2 { background: var(--ok); } .ruler .b3 { background: var(--warn); }
+.ruler .b4 { background: #E4692F; } .ruler .b5 { background: var(--bad); }
+.ruler-labels { display: grid; grid-template-columns: repeat(15, 1fr); font-size: 18px; color: var(--steel); margin-top: 6px; text-align: center; }
+
+/* Status chips (always with a word, never colour alone) */
+.chip { display: inline-block; padding: 2px 12px; border-radius: 4px; color: #fff; font-weight: 600; font-size: 22px; }
+.chip.ok { background: var(--ok); } .chip.warn { background: var(--warn); } .chip.bad { background: var(--bad); }
+
+/* Code / JSON */
+pre { font-family: var(--mono); font-size: 21px; line-height: 1.45; background: var(--panel); padding: 20px 24px; margin: 0; white-space: pre; }
+code { font-family: var(--mono); font-size: 0.92em; }
+
+/* Diagram text */
+svg text { font-family: var(--font); fill: var(--ink); }
+svg .t-cond { font-family: var(--cond); font-weight: 600; }
+svg .t-muted { fill: var(--steel); }
+
+/* Steps (used only where content is a real sequence) */
+.steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+.step { border-top: 4px solid var(--blue); padding-top: 14px; }
+.step b { font-family: var(--cond); font-weight: 600; font-size: 28px; display: block; margin-bottom: 6px; }
+
+/* Title slide */
+.title { background: var(--ink); color: var(--paper); padding-top: 140px; }
+.title h1 { font-size: 150px; letter-spacing: -0.03em; margin-bottom: 20px; }
+.title .sub { font-size: 44px; line-height: 1.25; max-width: 1300px; color: #C9D2DC; }
+.title .meta { position: absolute; left: 96px; bottom: 96px; font-size: 26px; color: #9AA7B4; line-height: 1.5; }
+.title .ruler span { height: 30px; }
+
+/* Appendix flag */
+.appendix h1::after { content: 'Appendix'; font-family: var(--font); font-weight: 500; font-size: 22px; color: var(--steel); margin-left: 24px; vertical-align: middle; border: 1.5px solid var(--rule); padding: 2px 12px; border-radius: 3px; }
+
+/* Reference list */
+ol.refs { columns: 2; column-gap: 64px; padding-left: 40px; font-size: 21px; line-height: 1.35; }
+ol.refs li { margin-bottom: 8px; break-inside: avoid; }
+ol.refs a { color: var(--blue); text-decoration: none; word-break: break-all; }
+
+/* Chart shell */
+.chart { width: 100%; }
+.chart .grid line { stroke: var(--rule); stroke-width: 1; }
+.chart .axis text { fill: var(--steel); font-size: 20px; }

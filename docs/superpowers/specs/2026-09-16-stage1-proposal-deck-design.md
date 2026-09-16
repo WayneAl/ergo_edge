@@ -46,12 +46,14 @@ Non-goals: prototype code and the 3-min video (sub-project 2, own spec); filling
 `make check` green on the final build; every page PNG reviewed for overflow and legibility at 50 % zoom;
 one pass mapping each rubric criterion → the slides that earn it.
 
-## Open decisions
-A. Toolchain: HTML/CSS → Chrome PDF (rec.) vs Marp Markdown vs Google Slides (hand-edited).
-B. Evidence: build the laptop prototype before locking the deck, so slide 12 shows real FPS and
-   REBA-vs-manual numbers (rec.; the video needs it anyway) vs a deck with a plan only.
-C. Reuse: copy golf_coach's pose front half (backends incl. Hailo adapter, smoothing, keypoints, gap-fill)
-   into this repo (rec.) vs a shared package.
-D. ASUS angle: fact-check ASUS's own manufacturing footprint, then pitch an ASUS line pilot as the Stage II ask.
-E. Product name (placeholder "ErgoEdge").
-F. Submission form: Onsite track (rec.) vs Global Online; UGen300 USB (rec.) vs M.2 — locked after submit.
+## Decisions (locked 2026-09-16, delegated by Wayne)
+A. Toolchain: HTML/CSS → headless Chrome PDF; fonts vendored (IBM Plex Sans / Sans Condensed / Mono).
+B. Evidence: deck is written now with every slide except 12 final; the laptop prototype (sub-project 2,
+   own spec) fills slide 12 and feeds the video. `make check` blocks the final build while 12 carries a TODO.
+C. Reuse: copy golf_coach's pose front half into `src/` when sub-project 2 starts; no shared package.
+D. ASUS angle: ASUS keeps some own sites (Luzhu/Guishan TW, Ostrava CZ, Juárez MX, Suzhou/Chongqing CN —
+   🟡 aggregator source) but most assembly is at ODMs (Pegatron). Slide 16 phrases it as the Stage II ask:
+   "a pilot station on an ASUS-owned line or an ASUS ODM partner line", never as a fact about ASUS factories.
+E. Product name: **LineSafe** ("ErgoEdge" is CerebrumEdge's product — now listed as a competitor on slide
+   15; "ErgoNode" is a PIM vendor). Repo name stays `ergo_edge`.
+F. Submission form: Onsite track (實體競賽組), UGen300 USB AI Accelerator.
