@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LineSafe — Stage I proposal</title>
+<link rel="stylesheet" href="deck.css">
+</head>
+<body>
+
+<!-- ============================== 1 Title ============================== -->
+<section class="slide title">
+  <svg class="defs" aria-hidden="true">
+    <defs>
+      <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-blue"/></marker>
+    </defs>
+  </svg>
+  <h1>LineSafe</h1>
+  <p class="sub">Continuous REBA/RULA ergonomic risk scoring at the workstation — offline, skeleton-only, on an ASUS UGen300.</p>
+  <div class="ruler-block">
+    <div class="ruler">
+      <span class="b1"></span><span class="b2"></span><span class="b2"></span><span class="b3"></span><span class="b3"></span><span class="b3"></span><span class="b3"></span><span class="b4"></span><span class="b4"></span><span class="b4"></span><span class="b5"></span><span class="b5"></span><span class="b5"></span><span class="b5"></span><span class="b5"></span>
+    </div>
+    <div class="ruler-labels">
+      <span class="g1"><b>Negligible</b>1</span><span class="g2"><b>Low</b>2–3</span><span class="g4"><b>Medium</b>4–7</span><span class="g3"><b>High</b>8–10</span><span class="g5"><b>Very high</b>11–15</span>
+    </div>
+    <p class="ruler-cap">REBA risk score<sup class="ref">R10</sup></p>
+  </div>
+  <div class="meta">Battlefield Lightning · Workplace AI · Onsite track<br>TEAM_NAME · October 2026</div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">1 / 18</span></div>
+</section>
+
+<!-- ============================== 2 Problem ============================== -->
+<section class="slide">
+  <h1>Ergonomic risk is assessed with a clipboard, once, by one person.</h1>
+  <div class="head-gap"></div>
+  <div class="cols cols-2 gap-l">
+    <div>
+      <h2>How an assessment happens today</h2>
+      <ol class="flow mt-s">
+        <li><b>Watch</b>An OSH manager stands beside one station for <span class="nw">about 1 h a day<span class="est">team estimate</span>.</span></li>
+        <li><b>Score by eye</b>They fill in a paper REBA or RULA checklist, posture by posture.</li>
+        <li><b>File monthly</b>The sheets are typed into a monthly report — about 8 h of desk work <span class="nw">a month<span class="est">team estimate</span>.</span></li>
+      </ol>
+    </div>
+    <div>
+      <h2>Why that is not enough</h2>
+      <div class="mt-s">
+        <div class="point"><div class="k">Subjective</div><p>Two assessors, two scores. The number depends on who held the clipboard.</p></div>
+        <div class="point"><div class="k">Sampled</div><p>The risky posture happens in the <span class="nw">95 %<span class="est">team estimate</span></span> of the shift nobody watches.</p></div>
+        <div class="point"><div class="k">No history</div><p>Nothing to show the insurer, the auditor or the worker when they ask what changed.</p></div>
+      </div>
+    </div>
+  </div>
+  <p class="closer">Work-related musculoskeletal disorders (WMSDs) are the largest category of occupational disease claims.</p>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">2 / 18</span></div>
+</section>
+
+<!-- ============================== 3 Why now ============================== -->
+<section class="slide">
+  <h1>Law, insurance and the labour shortage all push the same way.</h1>
+  <div class="head-gap"></div>
+  <div class="cols cols-3 mt-m">
+    <div class="pillar">
+      <p class="label">Law</p>
+      <div class="display">Art. 6 ¶2<small>Occupational Safety and Health Act, Taiwan<sup class="ref">R7</sup></small></div>
+      <p>Employers must identify and control workplace hazards, including ergonomic hazards. Control needs evidence that outlasts one visit.</p>
+    </div>
+    <div class="pillar">
+      <p class="label">Insurance</p>
+      <div class="display">Experience rating<small>Occupational accident insurance, Taiwan<sup class="ref">R8</sup></small></div>
+      <p>Premiums follow the accident record: a lower accident rate earns a lower premium. Evidence of control has a price.</p>
+    </div>
+    <div class="pillar">
+      <p class="label">Labour</p>
+      <div class="display">251 deaths<small>in major occupational accidents, Taiwan 2025, down from 287 in 2024<sup class="ref">R6</sup></small></div>
+      <p>The trend is improving. Plants that cannot hire more OSH staff need more coverage per head, not more clipboards.</p>
+    </div>
+  </div>
+  <p class="closer">One system answers all three: continuous evidence of control at every station, without adding headcount.</p>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">3 / 18</span></div>
+</section>
+
+<!-- ============================== 4 Who pays ============================== -->
+<section class="slide">
+  <h1>The buyer is the EHS department, and it already has the budget line.</h1>
+  <div class="head-gap"></div>
+  <table class="def">
+    <tbody>
+      <tr><th scope="row">Customer</th><td>Manufacturers with <span class="nw">≥ 200 staff<span class="est">team estimate</span></span>, through their EHS department<span class="sub">Also: EHS consultancies, as a tool for their assessments · insurers, as underwriting evidence</span></td></tr>
+      <tr><th scope="row">Decision-maker</th><td>Plant manager, EHS lead or certified OSH manager</td></tr>
+      <tr><th scope="row">Budget line</th><td>Safety equipment &amp; monitoring; training</td></tr>
+      <tr><th scope="row">Reason to pay</th><td>Accident cost and downtime · insurance premium rate · compliance</td></tr>
+    </tbody>
+  </table>
+  <div class="panel mt-l">
+    <h2>Pricing shape</h2>
+    <p>Hardware plus a one-time deployment service per station, with optional support. The worked numbers for one station are on slide 14.</p>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">4 / 18</span></div>
+</section>
+
+<!-- ============================== 5 Solution ============================== -->
+<section class="slide">
+  <h1>A USB stick turns any station&nbsp;PC into an ergonomics assessor.</h1>
+  <div class="head-gap"></div>
+  <svg width="1728" height="700" viewBox="0 0 1728 700" role="img" aria-label="Camera to station PC with UGen300, to pose skeleton, joint angles, REBA and RULA tables, score over time, then a live alert and a weekly report">
+    <!-- 1 camera -->
+    <rect class="box" x="74" y="66" width="140" height="96" rx="14"/>
+    <circle class="box-white" cx="144" cy="114" r="31"/>
+    <circle class="f-ink" cx="144" cy="114" r="14"/>
+    <circle class="f-blue" cx="194" cy="84" r="5"/>
+    <path class="ln" d="M144 162 V196 M108 204 H180"/>
+    <text x="144" y="262" class="t-mid t-24 t-b">Station camera</text>
+    <text x="144" y="292" class="t-mid t-22 t-muted">USB or IP</text>
+    <path class="arrow" d="M232 130 H302"/>
+
+    <!-- 2 station PC + UGen300 -->
+    <rect class="box" x="362" y="52" width="112" height="160" rx="8"/>
+    <path class="ln-steel" d="M380 80 H456 M380 96 H456 M380 112 H456"/>
+    <circle class="box" cx="418" cy="184" r="9"/>
+    <rect class="f-ink" x="472" y="154" width="10" height="16"/>
+    <rect class="box-blue" x="482" y="148" width="64" height="28" rx="5"/>
+    <text x="432" y="262" class="t-mid t-24 t-b">Station PC</text>
+    <text x="432" y="292" class="t-mid t-22 t-muted">+ UGen300 on USB-C</text>
+    <path class="arrow" d="M560 130 H608"/>
+
+    <!-- 3 pose skeleton -->
+    <g transform="translate(663,107)">
+      <rect class="box-panel" x="66" y="50" width="56" height="44" rx="3"/>
+      <path class="bone" d="M0 0 L81 -39 M81 -39 L93 -51 M81 -39 L88 6 L92 50 M0 0 L20 52 L6 102 M0 0 L4 54 L-12 102"/>
+      <circle cx="104" cy="-62" r="15" class="box"/>
+      <circle class="joint" cx="0" cy="0" r="6"/><circle class="joint" cx="81" cy="-39" r="6"/><circle class="joint" cx="88" cy="6" r="6"/><circle class="joint" cx="92" cy="50" r="6"/>
+      <circle class="joint" cx="20" cy="52" r="6"/><circle class="joint" cx="6" cy="102" r="6"/><circle class="joint" cx="4" cy="54" r="6"/><circle class="joint" cx="-12" cy="102" r="6"/>
+    </g>
+    <text x="720" y="262" class="t-mid t-24 t-b">Pose skeleton</text>
+    <text x="720" y="292" class="t-mid t-22 t-muted">17 keypoints<tspan class="t-blue t-20" dy="-9"> R3</tspan></text>
+    <path class="arrow" d="M812 130 H878"/>
+
+    <!-- 4 joint angles -->
+    <g transform="translate(951,107)">
+      <path class="bone-muted" d="M81 -39 L93 -51 M81 -39 L88 6 L92 50 M0 0 L20 52 L6 102 M0 0 L4 54 L-12 102"/>
+      <circle cx="104" cy="-62" r="15" class="box"/>
+      <path class="ln-steel" d="M0 0 V-100"/>
+      <path class="bone" d="M0 0 L81 -39"/>
+      <path d="M0 -58 A58 58 0 0 1 52.1 -25.4" fill="none" stroke="var(--ink)" stroke-width="3"/>
+      <circle class="joint" cx="0" cy="0" r="6"/><circle class="joint" cx="81" cy="-39" r="6"/>
+      <text x="-12" y="-44" class="t-end t-26 t-b">64°</text>
+    </g>
+    <text x="1008" y="262" class="t-mid t-24 t-b">Joint angles</text>
+    <text x="1008" y="292" class="t-mid t-22 t-muted">by geometry</text>
+    <path class="arrow" d="M1096 130 H1172"/>
+
+    <!-- 5 rule tables -->
+    <rect class="box-white" x="1200" y="52" width="192" height="156" rx="4"/>
+    <rect class="f-ink" x="1200" y="52" width="192" height="38" rx="4"/>
+    <text x="1296" y="79" class="t-mid t-20 t-b t-white">REBA · RULA</text>
+    <path class="ln-rule" d="M1200 129 H1392 M1200 168 H1392 M1248 90 V208 M1296 90 V208 M1344 90 V208"/>
+    <rect class="box-blue" x="1298" y="131" width="44" height="35"/>
+    <text x="1320" y="157" class="t-mid t-22 t-b t-white">9</text>
+    <text x="1296" y="262" class="t-mid t-24 t-b">Rule tables</text>
+    <text x="1296" y="292" class="t-mid t-22 t-muted">REBA and RULA</text>
+    <path class="arrow" d="M1410 130 H1464"/>
+
+    <!-- 6 score over time -->
+    <rect x="1478" y="46" width="250" height="52" fill="#E4692F" fill-opacity=".16"/>
+    <rect class="tint-warn" x="1478" y="100" width="250" height="56"/>
+    <rect class="tint-ok" x="1478" y="158" width="250" height="52"/>
+    <text x="1488" y="80" class="t-20 t-b">High</text>
+    <text x="1488" y="136" class="t-20 t-b">Medium</text>
+    <text x="1488" y="192" class="t-20 t-b">Low</text>
+    <polyline points="1578,190 1596,186 1612,176 1628,142 1646,130 1662,116 1680,70 1700,64 1722,72" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <text x="1603" y="262" class="t-mid t-24 t-b">Score over time</text>
+    <text x="1603" y="292" class="t-mid t-22 t-muted">per station</text>
+
+    <!-- branch to outputs -->
+    <path class="arrow" d="M1603 312 V352 H1300 V398"/>
+    <path class="arrow" d="M1603 352 H1640 V388"/>
+
+    <!-- output: station screen -->
+    <rect class="box-white" x="1156" y="410" width="288" height="178" rx="8"/>
+    <rect class="box-panel" x="1172" y="426" width="256" height="146"/>
+    <path class="ln" d="M1300 588 V612 M1252 618 H1348"/>
+    <text x="1190" y="462" class="t-20">Station 3 · 14:32</text>
+    <rect x="1190" y="478" width="76" height="34" rx="4" fill="#E4692F"/>
+    <text x="1228" y="502" class="t-mid t-20 t-b t-white">High</text>
+    <text x="1280" y="502" class="t-22 t-b">REBA 9</text>
+    <text x="1190" y="548" class="t-20 t-muted">trunk flexion 64°</text>
+    <text x="1300" y="660" class="t-mid t-24 t-b">Live alert</text>
+    <text x="1300" y="688" class="t-mid t-22 t-muted">on the station screen</text>
+
+    <!-- output: phone -->
+    <rect class="box-white" x="1586" y="394" width="112" height="206" rx="16"/>
+    <rect class="box-panel" x="1598" y="414" width="88" height="160" rx="3"/>
+    <path class="ln-steel" d="M1606 556 H1678"/>
+    <rect class="box-soft" x="1608" y="520" width="12" height="36"/><rect class="box-soft" x="1624" y="500" width="12" height="56"/><rect class="box-soft" x="1640" y="510" width="12" height="46"/><rect class="box-blue" x="1656" y="488" width="12" height="68"/>
+    <path class="ln-steel" d="M1608 440 H1676 M1608 456 H1660"/>
+    <text x="1728" y="660" class="t-end t-24 t-b">Weekly report</text>
+    <text x="1728" y="688" class="t-end t-22 t-muted">on a phone, over LAN</text>
+
+    <!-- annotations: no raw video, no cloud -->
+    <rect class="box" x="8" y="396" width="80" height="58" rx="6"/>
+    <path class="ln-steel" d="M20 404 V446 M76 404 V446"/>
+    <path class="ln-thick" d="M0 466 L96 384"/>
+    <text x="128" y="422" class="t-32 t-b">No raw video stored</text>
+    <text x="128" y="456" class="t-24 t-muted">Frames are discarded once the skeleton is extracted.</text>
+
+    <path class="box" d="M20 596 H78 A18 18 0 0 0 80 560 A27 27 0 0 0 30 552 A21 21 0 0 0 20 596 Z"/>
+    <path class="ln-thick" d="M0 616 L96 534"/>
+    <text x="128" y="572" class="t-32 t-b">No cloud</text>
+    <text x="128" y="606" class="t-24 t-muted">Scoring, storage and reports stay on the station PC and the plant LAN.</text>
+  </svg>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">5 / 18</span></div>
+</section>
+
+<!-- ============================== 6 Methodology ============================== -->
+<section class="slide">
+  <h1>Pose to score in four deterministic steps.</h1>
+  <div class="head-gap"></div>
+  <div class="steps four mt-s">
+    <div class="step">
+      <span class="num">1</span><b>Find the pose</b>
+      <p><code>yolov8m_pose</code><sup class="ref">R3</sup> returns 17 COCO keypoints for each person in every frame.</p>
+      <p class="muted">Target: ≥ 25 FPS at 1080p <span class="nw">per stream<span class="est">team estimate</span></span></p>
+    </div>
+    <div class="step">
+      <span class="num">2</span><b>Measure the angles</b>
+      <p>Plain geometry, no learning: trunk flexion, neck flexion, upper-arm elevation, lower-arm angle, knee flexion.</p>
+      <p class="muted">Trunk twist from the shoulder-to-hip width ratio.</p>
+    </div>
+    <div class="step">
+      <span class="num">3</span><b>Look up the score</b>
+      <p>REBA tables (Hignett &amp; McAtamney 2000)<sup class="ref">R10</sup> and RULA tables<sup class="ref">R11</sup>.</p>
+      <p class="muted">Load and coupling are set per station at calibration.</p>
+    </div>
+    <div class="step">
+      <span class="num">4</span><b>Score over time</b>
+      <p>Activity score: static posture &gt; 1 min, repetition &gt; 4/min, rapid change<sup class="ref">R10</sup>.</p>
+      <p class="muted">Output: events with timestamps.</p>
+    </div>
+  </div>
+  <div class="mt-l">
+    <div class="ruler">
+      <span class="b1"></span><span class="b2"></span><span class="b2"></span><span class="b3"></span><span class="b3"></span><span class="b3"></span><span class="b3"></span><span class="b4"></span><span class="b4"></span><span class="b4"></span><span class="b5"></span><span class="b5"></span><span class="b5"></span><span class="b5"></span><span class="b5"></span>
+    </div>
+    <div class="ruler-labels">
+      <span class="g1"><b>Negligible</b>1</span><span class="g2"><b>Low</b>2–3</span><span class="g4"><b>Medium</b>4–7</span><span class="g3"><b>High</b>8–10</span><span class="g5"><b>Very high</b>11–15</span>
+    </div>
+    <p class="ruler-cap">REBA risk score, what step 3 returns<sup class="ref">R10</sup></p>
+  </div>
+  <div class="panel risk mt-m">
+    <p><strong>2D pose cannot measure wrist flexion, load or grip — see slide 12.</strong> Pose-based REBA/RULA scoring is an active research line<sup class="ref">R12–R15</sup>; our contribution is running it continuously, offline, at the station.</p>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">6 / 18</span></div>
+</section>
+
+<!-- ============================== 7 Rules, not an LLM ============================== -->
+<section class="slide">
+  <h1>The live path is a rule engine; the LLM only writes the report.</h1>
+  <div class="head-gap"></div>
+  <div class="cols cols-2 gap-l">
+    <div class="path">
+      <h2>Live path — every frame</h2>
+      <div class="chain"><span>pose</span><i>→</i><span>angles</span><i>→</i><span>tables</span><i>→</i><span>alert</span></div>
+      <ul>
+        <li><b>Deterministic.</b> The same posture always gives the same score.</li>
+        <li><b>Auditable.</b> Every score names the angle that caused it.</li>
+        <li><b>Fast.</b> Table lookups keep up with the camera; no language model in the loop.</li>
+      </ul>
+    </div>
+    <div class="path soft">
+      <h2>Report path — weekly</h2>
+      <div class="chain"><span>events</span><i>→</i><span>Qwen2.5-1.5B</span><i>→</i><span>summary</span></div>
+      <ul>
+        <li><b>Same device.</b> Qwen2.5-1.5B-Instruct on the UGen300: <span class="nw">7.35 tok/s</span>, <span class="nw">2,048-token</span> context<sup class="ref">R4</sup>.</li>
+        <li><b>Plain language.</b> Turns the week’s event table into a summary in the plant’s language.</li>
+        <li><b>Off the live path.</b> <span class="nw">30–60 s per report<span class="est">team estimate</span></span>; scoring never depends on it.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="bottom-line panel">
+    <p class="formula" style="margin:0">REBA is a lookup table. An LLM would be slower and could be wrong; a table cannot.</p>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">7 / 18</span></div>
+</section>
+
+<!-- ============================== 8 Deployment ============================== -->
+<section class="slide">
+  <h1>It hangs on the line like a sensor, and the video never leaves the room.</h1>
+  <div class="head-gap"></div>
+  <div class="cols" style="grid-template-columns: 1040px 1fr; gap: 72px;">
+    <svg width="1040" height="690" viewBox="0 0 1040 690" role="img" aria-label="Camera to industrial PC with UGen300, SQLite on the host, LAN to phone or tablet dashboard; cloud crossed out">
+      <rect class="ln-rule" x="2" y="44" width="808" height="640" rx="12" style="stroke-width:2.5"/>
+      <text x="24" y="30" class="t-22 t-muted">Inside the plant — one LAN, no internet needed</text>
+
+      <!-- camera -->
+      <rect class="box" x="56" y="118" width="130" height="88" rx="13"/>
+      <circle class="box-white" cx="121" cy="162" r="28"/>
+      <circle class="f-ink" cx="121" cy="162" r="12"/>
+      <circle class="f-blue" cx="168" cy="134" r="5"/>
+      <text x="121" y="250" class="t-mid t-24 t-b">Station camera</text>
+      <text x="121" y="278" class="t-mid t-22 t-muted">USB webcam or IP cam</text>
+      <path class="arrow" d="M196 162 H276"/>
+
+      <!-- host PC -->
+      <rect class="box" x="290" y="104" width="240" height="118" rx="8"/>
+      <path class="ln-steel" d="M312 132 H420 M312 150 H420 M312 168 H420"/>
+      <circle class="box" cx="498" cy="196" r="9"/>
+      <rect class="f-ink" x="528" y="170" width="10" height="16"/>
+      <rect class="box-blue" x="538" y="164" width="62" height="28" rx="5"/>
+      <text x="614" y="174" class="t-22 t-b">UGen300</text>
+      <text x="614" y="200" class="t-20 t-muted">USB-C 10 Gbps<tspan class="t-blue" dy="-8"> R1</tspan></text>
+      <text x="410" y="264" class="t-mid t-24 t-b">Existing industrial PC</text>
+      <text x="410" y="292" class="t-mid t-22 t-muted">or mini-PC</text>
+
+      <!-- SQLite on host -->
+      <path class="ln-steel" d="M360 304 V336"/>
+      <path class="box" d="M300 350 V420 A60 15 0 0 0 420 420 V350"/>
+      <ellipse class="box" cx="360" cy="350" rx="60" ry="15"/>
+      <text x="360" y="468" class="t-mid t-24 t-b">SQLite events</text>
+      <text x="360" y="496" class="t-mid t-22 t-muted">on the host</text>
+
+      <!-- LAN to devices -->
+      <path class="arrow" d="M490 304 V520"/>
+      <text x="506" y="420" class="t-24 t-b">LAN</text>
+
+      <!-- tablet + phone -->
+      <rect class="box-white" x="420" y="534" width="210" height="130" rx="12"/>
+      <rect class="box-panel" x="434" y="548" width="182" height="102" rx="3"/>
+      <path class="ln-steel" d="M446 632 H604"/>
+      <rect class="box-soft" x="452" y="600" width="20" height="32"/><rect class="box-soft" x="480" y="584" width="20" height="48"/><rect class="box-soft" x="508" y="594" width="20" height="38"/><rect class="box-blue" x="536" y="570" width="20" height="62"/><rect class="box-soft" x="564" y="590" width="20" height="42"/>
+      <rect class="box-white" x="650" y="534" width="70" height="130" rx="12"/>
+      <rect class="box-panel" x="660" y="550" width="50" height="94" rx="2"/>
+      <text x="398" y="590" class="t-end t-24 t-b">Dashboard</text>
+      <text x="398" y="618" class="t-end t-22 t-muted">on a phone or tablet</text>
+
+      <!-- crossed-out cloud outside the plant -->
+      <path class="box" d="M866 330 H990 A30 30 0 0 0 994 270 A46 46 0 0 0 906 258 A36 36 0 0 0 866 330 Z"/>
+      <path class="ln-thick" d="M846 356 L1016 226"/>
+      <text x="930" y="400" class="t-mid t-24 t-b">No cloud</text>
+      <text x="930" y="428" class="t-mid t-22 t-muted">no upload</text>
+    </svg>
+    <div>
+      <h2>The customer provides</h2>
+      <ul class="rules">
+        <li>A PC with a USB-C 10 Gbps port<sup class="ref">R1</sup></li>
+        <li>Power</li>
+        <li>One network drop</li>
+        <li>An EHS contact</li>
+      </ul>
+      <h2>Deployment, per station</h2>
+      <table class="compact">
+        <thead><tr><th>Step</th><th class="num">Duration<span class="est">team estimate</span></th></tr></thead>
+        <tbody>
+          <tr><td>Site survey</td><td class="num">1 day</td></tr>
+          <tr><td>Install</td><td class="num">1–2 days</td></tr>
+          <tr><td>Calibration</td><td class="num">3–5 days</td></tr>
+          <tr><td>Parallel run with manual scoring</td><td class="num">2 weeks</td></tr>
+          <tr><td>Training</td><td class="num">1 day</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">8 / 18</span></div>
+</section>
+
+<!-- ============================== 9 Software architecture ============================== -->
+<section class="slide">
+  <h1>Five small modules, one interface to the accelerator.</h1>
+  <div class="head-gap"></div>
+  <div class="cols" style="grid-template-columns: 1060px 1fr; gap: 60px;">
+    <svg width="1060" height="690" viewBox="0 0 1060 690" role="img" aria-label="Modules: capture, pose with three backends, angles, reba and rula, events, then ui and report">
+      <!-- capture -->
+      <rect class="box" x="0" y="0" width="340" height="72" rx="6"/>
+      <text x="170" y="45" class="t-mid t-26 t-mono">capture</text>
+      <text x="400" y="34" class="t-26 t-b">OpenCV frames</text>
+      <text x="400" y="62" class="t-24 t-muted">from a USB or IP camera</text>
+      <path class="arrow" d="M170 76 V152"/>
+
+      <!-- pose -->
+      <text x="400" y="144" class="t-24 t-muted"><tspan class="t-mono t-b" style="fill:var(--ink)">PoseBackend</tspan> — the only accelerator-specific code</text>
+      <rect class="box-blue" x="0" y="160" width="340" height="72" rx="6"/>
+      <text x="170" y="205" class="t-mid t-26 t-mono t-white">pose</text>
+      <path class="ln" d="M340 196 H392 M392 176 V216" style="stroke:var(--blue)"/>
+      <rect class="box-white" x="400" y="160" width="200" height="72" rx="6"/>
+      <text x="500" y="192" class="t-mid t-22 t-b">Hailo .hef</text>
+      <text x="500" y="220" class="t-mid t-20 t-muted">production</text>
+      <rect class="box-white" x="620" y="160" width="200" height="72" rx="6"/>
+      <text x="720" y="192" class="t-mid t-22 t-b">Ultralytics</text>
+      <text x="720" y="220" class="t-mid t-20 t-muted">dev laptop</text>
+      <rect class="box-white" x="840" y="160" width="200" height="72" rx="6"/>
+      <text x="940" y="192" class="t-mid t-22 t-b">Replay</text>
+      <text x="940" y="220" class="t-mid t-20 t-muted">tests</text>
+      <path class="arrow" d="M170 236 V264"/>
+
+      <!-- angles -->
+      <rect class="box" x="0" y="272" width="340" height="72" rx="6"/>
+      <text x="170" y="317" class="t-mid t-26 t-mono">angles</text>
+      <text x="400" y="306" class="t-26 t-b">Pure geometry</text>
+      <text x="400" y="334" class="t-24 t-muted">unit-tested against hand-built poses</text>
+      <path class="arrow" d="M170 348 V376"/>
+
+      <!-- reba / rula -->
+      <rect class="box" x="0" y="384" width="340" height="72" rx="6"/>
+      <text x="170" y="429" class="t-mid t-26 t-mono">reba / rula</text>
+      <text x="400" y="418" class="t-26 t-b">Pure lookup tables</text>
+      <text x="400" y="446" class="t-24 t-muted">unit-tested against published worked examples</text>
+      <path class="arrow" d="M170 460 V488"/>
+
+      <!-- events -->
+      <rect class="box" x="0" y="496" width="340" height="72" rx="6"/>
+      <text x="170" y="541" class="t-mid t-26 t-mono">events</text>
+      <text x="400" y="530" class="t-26 t-b">Time windows over the score</text>
+      <text x="400" y="558" class="t-24 t-muted">written to SQLite on the host</text>
+      <path class="arrow" d="M170 572 V592 H80 V604"/>
+      <path class="arrow" d="M170 592 H260 V604"/>
+
+      <!-- ui + report: readers of the event store -->
+      <rect class="box-panel" x="0" y="612" width="160" height="72" rx="6"/>
+      <text x="80" y="657" class="t-mid t-26 t-mono">ui</text>
+      <rect class="box-panel" x="180" y="612" width="160" height="72" rx="6"/>
+      <text x="260" y="657" class="t-mid t-26 t-mono">report</text>
+      <text x="400" y="642" class="t-26 t-b">Readers of the event store</text>
+      <text x="400" y="670" class="t-24 t-muted">local web page with live overlay; weekly LLM report</text>
+    </svg>
+    <div>
+      <h2>One event, as stored</h2>
+<pre>{
+  "station": "S3",
+  "t": "2026-10-02T14:32:07",
+  "reba": 9,
+  "band": "high",
+  "drivers": [
+    "trunk_flexion 64°",
+    "upper_arm 95°"
+  ],
+  "duration_s": 38
+}</pre>
+      <p class="small muted mt-s">Example event, illustrative values.</p>
+      <div class="panel mt-m">
+        <p style="margin:0">No face recognition and no person ID. Events belong to a station position, not to a worker.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">9 / 18</span></div>
+</section>
+
+<!-- ============================== 10 Why UGen300 ============================== -->
+<section class="slide">
+  <h1>2.5 W, always on, and the models are already compiled.</h1>
+  <div class="head-gap"></div>
+  <div class="cols" style="grid-template-columns: 1fr 560px; gap: 80px;">
+    <div>
+      <div class="fact">
+        <div class="big">2.5<span class="unit">W</span></div>
+        <p>Typical power<sup class="ref">R1</sup>. Fanless and 150 g, so it can stay on through every shift.</p>
+      </div>
+      <div class="fact">
+        <div class="big">40<span class="unit">TOPS</span></div>
+        <p>INT4, or 20 TOPS INT8, with 8 GB LPDDR4 on the device<sup class="ref">R1</sup>.</p>
+      </div>
+      <div class="fact">
+        <div class="big word">.hef</div>
+        <p><code>yolov8m_pose</code>, <code>hand_landmark_lite</code> and Qwen2.5-1.5B-Instruct are published pre-compiled for Hailo-10H<sup class="ref">R3, R4</sup>. No model conversion before the pilot.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <h2>What we use it for</h2>
+        <p>Not peak LLM speed. An independent test measured Hailo-10H LLM inference on a Raspberry Pi 5 at <span class="nw">1.87 W<sup class="ref">R5</sup>.</span> The value is low-power, always-on inference beside the camera.</p>
+        <p class="small muted" style="margin:0">Streams per unit: measured in Stage II.</p>
+      </div>
+      <h2 class="mt-m">Why not the cloud</h2>
+      <p>Continuous video would have to leave the plant, every station would need upstream bandwidth, and every worker would have to consent to being filmed off-site.</p>
+    </div>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">10 / 18</span></div>
+</section>
+
+<!-- ============================== 11 Privacy ============================== -->
+<section class="slide">
+  <h1>We keep the skeleton and throw the pixels away.</h1>
+  <div class="head-gap"></div>
+  <div class="cols cols-2 gap-l">
+    <div>
+      <div class="cols cols-2" style="gap:40px">
+        <div>
+          <h2>Stored</h2>
+          <ul class="rules">
+            <li>17 keypoints per person<sup class="ref">R3</sup>, a rolling window of a few seconds, in RAM only</li>
+            <li>Events in SQLite: station, time, score, and the angles that drove it</li>
+          </ul>
+        </div>
+        <div>
+          <h2>Never stored</h2>
+          <ul class="rules">
+            <li>Raw video frames</li>
+            <li>Faces</li>
+            <li>Identities or names</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h2>What the EHS manager sees</h2>
+      <div class="notice">
+        <div class="line1">Station 3 · 14:32 · REBA 9 <span class="chip high">High</span></div>
+        <div class="line2">Trunk flexion 64° for 38 s</div>
+        <div class="who">What they cannot see: who was standing there. It was never recorded.</div>
+      </div>
+      <p class="small muted mt-s">Example event, illustrative values.</p>
+    </div>
+  </div>
+  <div class="mt-l">
+    <div class="ruler">
+      <span class="b1"></span><span class="b2"></span><span class="b2"></span><span class="b3"></span><span class="b3"></span><span class="b3"></span><span class="b3"></span><span class="b4"></span><span class="b4 on"></span><span class="b4"></span><span class="b5"></span><span class="b5"></span><span class="b5"></span><span class="b5"></span><span class="b5"></span>
+    </div>
+    <div class="ruler-labels">
+      <span class="g1"><b>Negligible</b>1</span><span class="g2"><b>Low</b>2–3</span><span class="g4"><b>Medium</b>4–7</span><span class="g3"><b>High</b>8–10</span><span class="g5"><b>Very high</b>11–15</span>
+    </div>
+    <p class="ruler-cap">The example event sits in the High band of the REBA score<sup class="ref">R10</sup></p>
+  </div>
+  <p class="closer">The system rates the task design, not the person.</p>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">11 / 18</span></div>
+</section>
+
+<!-- ============================== 12 Feasibility ============================== -->
+<section class="slide">
+  <h1>The pose front half already runs; the scoring tables are next.</h1>
+  <div class="head-gap"></div>
+  <div class="cols cols-2 gap-l">
+    <div>
+      <h2>Runs today, on the dev laptop</h2>
+      <div class="big">≈ 48<span class="unit">FPS</span></div>
+      <p class="fig-label"><code>yolov8m-pose</code> on an Apple M4 Pro (MPS, 640 px model input) — our own measurement, from the previous project</p>
+      <ul class="rules mt-m">
+        <li>One-Euro smoothing of keypoint tracks, and gap filling for short drop-outs</li>
+        <li>Hailo <code>.hef</code> adapter written against the pyHailoRT 5.3 API — <strong>not yet run on hardware</strong></li>
+        <!-- TODO: hailo fps -->
+        <li class="muted">Hailo-10H throughput: measured in Stage II on the provided unit<sup class="ref">R21</sup></li>
+      </ul>
+    </div>
+    <div>
+      <h2>What the Stage I video shows</h2>
+      <ol class="beats">
+        <li>A volunteer lifts a box at a mock station, scored live on the laptop.</li>
+        <li>The score climbs <span class="chip ok">Low</span> → <span class="chip warn">Medium</span> → <span class="chip high">High</span> and the alert fires.</li>
+        <li>The network cable is pulled; scoring carries on.</li>
+        <li>The dashboard opens on a phone.</li>
+      </ol>
+      <h2 class="mt-m">Known limits, stated plainly</h2>
+      <ul class="rules">
+        <li><strong>Wrist flexion:</strong> COCO-17 has no hand points. Run <code>hand_landmark_lite</code> on a wrist crop, or use a station default.</li>
+        <li><strong>Load and coupling:</strong> not visible to a camera; set per station at calibration.</li>
+        <li><strong>2D foreshortening:</strong> a camera placement guideline, checked by the κ study (slide 13).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">12 / 18</span></div>
+</section>
+
+<!-- ============================== 13 Validation ============================== -->
+<section class="slide">
+  <h1>We will publish agreement with human assessors, not just FPS.</h1>
+  <div class="head-gap"></div>
+  <table class="targets">
+    <thead><tr><th style="width:300px">What we measure</th><th style="width:600px">Stage II target<span class="est">team estimate</span></th><th>How</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Throughput</strong></td><td class="t">≥ 25 FPS at 1080p per stream</td><td>On the UGen300, logged per stream</td></tr>
+      <tr><td><strong>Agreement</strong></td><td class="t">Cohen’s κ ≥ 0.7 on ≥ 200 postures</td><td>Two certified assessors score sampled postures independently; the system is compared with each</td></tr>
+      <tr><td><strong>Stability</strong></td><td class="t">7 × 24 h soak</td><td>Dropped frames and false alerts counted over the whole run</td></tr>
+      <tr><td><strong>Angle accuracy</strong></td><td class="t">Error reported per angle</td><td>Scripted postures, against a goniometer or a 3D pose reference</td></tr>
+    </tbody>
+  </table>
+  <div class="panel mt-l">
+    <h2>The same protocol runs at every customer site</h2>
+    <p style="margin:0">The <span class="nw">two-week<span class="est">team estimate</span></span> parallel run in deployment (slide 8) scores alongside the plant’s own assessor, and agreement is computed before go-live.</p>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">13 / 18</span></div>
+</section>
+
+<!-- ============================== 14 ROI ============================== -->
+<section class="slide">
+  <h1>One station pays back in under a year even if we are half wrong.</h1>
+  <div class="head-gap"></div>
+  <div class="cols" style="grid-template-columns: 690px 1fr; gap: 80px;">
+    <div>
+      <h2>Cost of one station, NT$</h2>
+      <table class="compact">
+        <tbody>
+          <tr><td>UGen300 USB<sup class="ref">R1</sup></td><td class="num">6,890</td></tr>
+          <tr><td>USB webcam</td><td class="num">1,200<span class="est">team estimate</span></td></tr>
+          <tr><td>Deployment service</td><td class="num">50,000<span class="est">team estimate</span></td></tr>
+          <tr class="total"><td>CAPEX, on an existing PC</td><td class="num">58,090<span class="est">team estimate</span></td></tr>
+          <tr><td>OPEX per year (power + maintenance)</td><td class="num">1,300<span class="est">team estimate</span></td></tr>
+        </tbody>
+      </table>
+      <div class="panel mt-m">
+        <p style="margin:0"><strong>Half wrong?</strong> If the base-case benefit is only half as large, payback is <span class="nw">8.0 months<span class="est">team estimate</span>.</span></p>
+      </div>
+    </div>
+    <div>
+      <h2>Annual benefit per station (NT$) and payback<span class="est">team estimate</span></h2>
+      <svg width="958" height="318" viewBox="0 0 958 318" role="img" aria-label="Annual benefit: conservative 75,858, base 177,922, optimistic 384,589 NT$">
+        <path class="f-soft" d="M0 272 V229.2 Q0 225.2 4 225.2 H313.3 Q317.3 225.2 317.3 229.2 V272 Z"/>
+        <path class="f-mid" d="M319.3 272 V164.4 Q319.3 160.4 323.3 160.4 H634.7 Q638.7 160.4 638.7 164.4 V272 Z"/>
+        <path class="f-blue" d="M640.7 272 V50 Q640.7 46 644.7 46 H954 Q958 46 958 50 V272 Z"/>
+        <line x1="0" y1="272" x2="958" y2="272" stroke="var(--ink)" stroke-width="2"/>
+        <text x="158.7" y="211" class="t-mid t-28 t-b">75,858</text>
+        <text x="479" y="146" class="t-mid t-28 t-b">177,922</text>
+        <text x="799.3" y="32" class="t-mid t-28 t-b">384,589</text>
+        <text x="158.7" y="308" class="t-mid t-26 t-b">Conservative</text>
+        <text x="479" y="308" class="t-mid t-26 t-b">Base</text>
+        <text x="799.3" y="308" class="t-mid t-26 t-b">Optimistic</text>
+      </svg>
+      <div class="payback mt-s">
+        <div><div class="big">9.3</div><div class="fig-label">months to pay back</div></div>
+        <div><div class="big">3.9</div><div class="fig-label">months to pay back</div></div>
+        <div><div class="big">1.8</div><div class="fig-label">months to pay back</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel mt-m">
+    <p style="margin:0" class="small">Grant Thornton 2026<sup class="ref">R9</sup>: of 100 manufacturing executives, 64 % saw efficiency gains from AI and none saw significant cost savings. So we count only reclaimed OSH hours and avoided incidents — one incident every five years in the conservative <span class="nw">case<span class="est">team estimate</span>.</span> Formulas and inputs: appendix A2.</p>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">14 / 18</span></div>
+</section>
+
+<!-- ============================== 15 Competition ============================== -->
+<section class="slide">
+  <h1>Cloud video tools assess a clip; we watch the station.</h1>
+  <div class="head-gap"></div>
+  <table class="cmp">
+    <thead>
+      <tr>
+        <th></th>
+        <th class="hl">LineSafe</th>
+        <th>Cloud video assessment<span class="who">CerebrumEdge ErgoEdge, TuMeke, VelocityEHS<sup class="ref">R16–R18</sup></span></th>
+        <th>Wearables<span class="who">Soter Analytics<sup class="ref">R19</sup></span></th>
+        <th>Paper REBA</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Coverage</td><td class="hl"><b>Continuous</b></td><td>Sampled clips</td><td>Continuous, while worn</td><td>Sampled visit</td></tr>
+      <tr><td>Video leaves the site</td><td class="hl"><b>No</b></td><td>Yes</td><td>No video</td><td>No video</td></tr>
+      <tr><td>Worker wears a device</td><td class="hl"><b>No</b></td><td>No</td><td>Yes</td><td>No</td></tr>
+      <tr><td>Cost grows with</td><td class="hl"><b>Stations</b></td><td>Clips filmed</td><td>Workers</td><td>Assessor hours</td></tr>
+      <tr><td>Explains the score by angle</td><td class="hl"><b>Yes</b>, with time and duration</td><td>Yes, per clip</td><td>Partial</td><td>Yes, on the sheet</td></tr>
+      <tr><td>Works offline</td><td class="hl"><b>Yes</b></td><td>No</td><td>Partial</td><td>Yes</td></tr>
+    </tbody>
+  </table>
+  <p class="footnote">Vendor columns: vendor claims, from public sites, 2026<sup class="ref">R16–R19</sup>. LineSafe column: our design, to be validated in Stage II (slide 13).</p>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">15 / 18</span></div>
+</section>
+
+<!-- ============================== 16 Roadmap and risks ============================== -->
+<section class="slide">
+  <h1>Twelve weeks from finalist notice to a pilot station.</h1>
+  <p class="lede" style="margin-bottom:24px">Plan by week after the finalist notice<span class="est">team estimate</span>. The finals fall in week 8 (19 Dec 2026)<sup class="ref">R21</sup>.</p>
+  <svg width="1728" height="266" viewBox="0 0 1728 266" role="img" aria-label="Weeks 1-2 bring-up, 3-6 scoring engine, 7-9 product surface, 10-12 validation; finals in week 8">
+    <rect class="box-soft" x="0" y="40" width="284" height="70" rx="4"/>
+    <rect class="box-soft" x="288" y="40" width="572" height="70" rx="4"/>
+    <rect class="box-soft" x="864" y="40" width="428" height="70" rx="4"/>
+    <rect class="box-blue" x="1296" y="40" width="432" height="70" rx="4"/>
+    <text x="16" y="84" class="t-26 t-b"><tspan class="t-blue">1</tspan>  Bring-up</text>
+    <text x="304" y="84" class="t-26 t-b"><tspan class="t-blue">2</tspan>  Scoring engine</text>
+    <text x="880" y="84" class="t-26 t-b"><tspan class="t-blue">3</tspan>  Product surface</text>
+    <text x="1312" y="84" class="t-26 t-b t-white">4  Validation</text>
+    <path class="ln-thick" d="M1121 30 V120"/>
+    <text x="1121" y="22" class="t-mid t-22 t-b">Finals</text>
+    <g class="t-20 t-muted">
+      <text x="72" y="146" class="t-mid t-20 t-muted">Week 1</text><text x="216" y="146" class="t-mid t-20 t-muted">2</text>
+      <text x="360" y="146" class="t-mid t-20 t-muted">3</text><text x="504" y="146" class="t-mid t-20 t-muted">4</text>
+      <text x="648" y="146" class="t-mid t-20 t-muted">5</text><text x="792" y="146" class="t-mid t-20 t-muted">6</text>
+      <text x="936" y="146" class="t-mid t-20 t-muted">7</text><text x="1080" y="146" class="t-mid t-20 t-muted">8</text>
+      <text x="1224" y="146" class="t-mid t-20 t-muted">9</text><text x="1368" y="146" class="t-mid t-20 t-muted">10</text>
+      <text x="1512" y="146" class="t-mid t-20 t-muted">11</text><text x="1656" y="146" class="t-mid t-20 t-muted">12</text>
+    </g>
+    <text x="16" y="190" class="t-24">Pose FPS and</text>
+    <text x="16" y="218" class="t-24">.hef decode on the</text>
+    <text x="16" y="246" class="t-24">provided UGen300<tspan class="t-blue t-20" dy="-9"> R21</tspan></text>
+    <text x="304" y="190" class="t-24">REBA/RULA engine, live overlay,</text>
+    <text x="304" y="218" class="t-24">SQLite events</text>
+    <text x="880" y="190" class="t-24">Dashboard, weekly LLM report,</text>
+    <text x="880" y="218" class="t-24">one-command installer</text>
+    <text x="1312" y="190" class="t-24">κ study and 7 × 24 h soak</text>
+    <text x="1312" y="218" class="t-24">→ evidence for a pilot station</text>
+  </svg>
+  <div class="cols mt-s" style="grid-template-columns: 1fr 560px; gap: 72px;">
+    <table class="risks">
+      <thead><tr><th style="width:400px">Risk</th><th>Mitigation</th></tr></thead>
+      <tbody>
+        <tr><td>Hailo decode path unverified</td><td>Replay-based tests now; hardware bring-up comes first</td></tr>
+        <tr><td>2D angle error</td><td>κ study and a camera placement guide</td></tr>
+        <tr><td>Worker acceptance</td><td>Skeleton-only storage; score the task, not the person</td></tr>
+        <tr><td>Multi-person stations</td><td>Per-position tracking — planned work, not done yet</td></tr>
+      </tbody>
+    </table>
+    <div class="panel">
+      <h2>The ask</h2>
+      <p style="margin:0">A pilot station on an ASUS-owned line or an ASUS ODM partner line during Stage II<sup class="ref">R20</sup>.</p>
+    </div>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">16 / 18</span></div>
+</section>
+
+<!-- ============================== 17 Team ============================== -->
+<section class="slide">
+  <h1>One builder, full stack, from Move contracts to pose pipelines.</h1>
+  <div class="head-gap"></div>
+  <p class="team-name mt-m">TEAM_NAME</p>
+  <div class="members">
+    <div class="member">
+      <h2>MEMBER_NAME</h2>
+      <p class="role">Founding full-stack engineer</p>
+      <p>Blockchain backends, Rust services, TypeScript SDKs, Next.js; pose-estimation pipeline built for the previous project.</p>
+    </div>
+  </div>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">17 / 18</span></div>
+</section>
+
+<!-- ============================== 18 References ============================== -->
+<section class="slide">
+  <h1>References</h1>
+  <ol class="refs rn">
+    <li>ASUS, UGen300 USB AI Accelerator — specifications and price. <span class="url">https://www.asus.com/<wbr>tw/<wbr>motherboards-components/<wbr>ai-accelerator/<wbr>ugen/<wbr>ugen300-usb-8g/<wbr>techspec/<wbr></span></li>
+    <li>CNX Software, ASUS UGen300 USB AI accelerator (Hailo-10H, 8 GB), 3 Aug 2026. <span class="url">https://cnx-software.com/<wbr>2026/<wbr>08/<wbr>03/<wbr>299-99-asus-ugen300-usb-ai-accelerator-hailo-10h-8gb-lpddr4</span></li>
+    <li>Hailo Model Zoo, compiled models v5.4.0 for Hailo-10H (yolov8m_pose, hand_landmark_lite). <span class="url">https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/<wbr>ModelZoo/<wbr>Compiled/<wbr>v5.4.0/<wbr>hailo10h/<wbr></span></li>
+    <li>Hailo Model Zoo GenAI v5.3.0, model specifications (MODELS.rst). <span class="url">https://raw.githubusercontent.com/<wbr>hailo-ai/<wbr>hailo_model_zoo_genai/<wbr>main/<wbr>docs/<wbr>MODELS.rst</span></li>
+    <li>LLM Inference at the Edge — Raspberry Pi 5 with Hailo-10H. arXiv 2603.23640, 2026. <span class="url">https://arxiv.org/html/2603.23640v1</span></li>
+    <li>Ministry of Labor and Occupational Safety and Health Administration, Taiwan — major occupational accident statistics 2025 (ROC 114); minimum wage announcement, 21 Oct 2025.</li>
+    <li>Occupational Safety and Health Act (Taiwan), Article 6, paragraph 2.</li>
+    <li>Occupational Accident Insurance and Protection Act (Taiwan) — experience-rated premiums.</li>
+    <li>Grant Thornton, 2026 AI Impact Survey (manufacturing), via LINE Today. <span class="url">https://today.line.me/<wbr>tw/<wbr>v3/<wbr>article/<wbr>GgraBR7</span></li>
+    <li>Hignett S., McAtamney L. Rapid Entire Body Assessment (REBA). <i>Applied Ergonomics</i> 31(2):201–205, 2000.</li>
+    <li>McAtamney L., Corlett E. N. RULA: a survey method for the investigation of work-related upper limb disorders. <i>Applied Ergonomics</i> 24(2):91–99, 1993.</li>
+    <li>Industrial Ergonomics Risk Analysis Based on 3D-Human Pose Estimation. <i>Electronics</i> (MDPI) 11(20):3403, 2022.</li>
+    <li>Ergonomic Risk Assessment Using Human Pose Estimation. ACM, 2025. doi:10.1145/3719384.3719453</li>
+    <li>Real-time ergonomic risk assessment of musculoskeletal disorders. <i>International Journal of Workplace Health Management</i> 19(4):457, Emerald.</li>
+    <li>Improvements for adjustment factors of REBA and RULA (EMG-validated). ScienceDirect, PII S0169814126000673, 2026.</li>
+    <li>CerebrumEdge — ErgoEdge. <span class="url">cerebrumedge.com</span></li>
+    <li>TuMeke. <span class="url">tumeke.io</span></li>
+    <li>VelocityEHS — Industrial Ergonomics. <span class="url">velocityehs.com</span></li>
+    <li>Soter Analytics. <span class="url">soteranalytics.com</span></li>
+    <li>Pegatron — Wikipedia (ASUS manufacturing spin-off, 2008).</li>
+    <li>ASUS UGen AI League — contest rules. <span class="url">https://contest.bhuntr.com/<wbr>tw/<wbr>39jg9vimiynrhlksze/<wbr>home/<wbr></span></li>
+  </ol>
+  <p class="gh"><strong>Code:</strong> <span class="url">https://github.com/WayneAl/ergo_edge</span> — private during the contest; access granted to the jury on request.</p>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">18 / 18</span></div>
+</section>
+
+<!-- ============================== A1 Keypoint mapping ============================== -->
+<section class="slide appendix">
+  <h1>COCO-17 to REBA/RULA: which keypoints give which angle</h1>
+  <div class="head-gap"></div>
+  <table class="dense">
+    <thead><tr><th style="width:170px">Segment</th><th style="width:270px">COCO-17 keypoints</th><th style="width:420px">Angle</th><th>REBA score<sup class="ref">R10</sup></th><th style="width:250px">Camera</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Trunk</strong></td><td>shoulders, hips</td><td>hip midpoint → shoulder midpoint, against vertical; twist from shoulder/hip width ratio</td><td>upright 1 · 0–20° 2 · 20–60° 3 · &gt; 60° 4; +1 twist or side-bend</td><td>Measured; twist is a proxy</td></tr>
+      <tr><td><strong>Neck</strong></td><td>nose, ears, shoulders</td><td>shoulder midpoint → head, against the trunk line</td><td>0–20° 1 · &gt; 20° or extension 2; +1 twist or side-bend</td><td>Measured</td></tr>
+      <tr><td><strong>Legs</strong></td><td>hips, knees, ankles</td><td>knee angle; one-leg or unstable stance from ankle positions</td><td>bilateral 1 · unilateral or unstable 2; +1 knee 30–60° · +2 knee &gt; 60°</td><td>Measured</td></tr>
+      <tr><td><strong>Upper arm</strong></td><td>shoulders, elbows, hips</td><td>shoulder → elbow, against the trunk line</td><td>20° extension to 20° flexion 1 · 20–45° 2 · 45–90° 3 · &gt; 90° 4; +1 raised shoulder · +1 abducted · −1 supported</td><td>Measured</td></tr>
+      <tr><td><strong>Lower arm</strong></td><td>shoulders, elbows, wrists</td><td>elbow angle</td><td>60–100° 1 · otherwise 2</td><td>Measured</td></tr>
+      <tr><td><strong>Wrist</strong></td><td>wrists only</td><td>needs hand points</td><td>0–15° 1 · &gt; 15° 2; +1 deviation or twist</td><td>Limited: <code>hand_landmark_lite</code> on a wrist crop, or a station default</td></tr>
+      <tr><td><strong>Load, coupling</strong></td><td>—</td><td>not visible in the image</td><td>set per station at calibration</td><td>Not visible</td></tr>
+    </tbody>
+  </table>
+  <p class="small mt-s">Activity score, +1 each: static posture &gt; 1 min · repetition &gt; 4/min · rapid large change<sup class="ref">R10</sup>. RULA<sup class="ref">R11</sup> uses the same angles with its own bands and a 1–7 score. All angles are 2D projections; accuracy is validated by the κ study (slide 13).</p>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">A1 / 3</span></div>
+</section>
+
+<!-- ============================== A2 ROI formulas ============================== -->
+<section class="slide appendix">
+  <h1>ROI formulas and scenario inputs</h1>
+  <div class="head-gap"></div>
+  <div class="panel">
+    <p class="formula">Payback (months) = CAPEX ÷ (annual benefit − OPEX) × 12</p>
+    <p class="formula" style="margin:0">3-year ROI = (3 × annual benefit − 3 × OPEX − CAPEX) ÷ CAPEX</p>
+  </div>
+  <table class="compact mt-m">
+    <thead><tr><th>Scenario, NT$ per station<span class="est">team estimate</span></th><th class="num">OSH hours reclaimed</th><th class="num">Incident avoided, per year</th><th class="num">Annual benefit</th><th class="num">Payback</th><th class="num">3-year ROI</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Conservative</strong></td><td class="num">55,858 <span class="muted">(18 h / month)</span></td><td class="num">1 per 5 years × 100,000 = 20,000</td><td class="num">75,858</td><td class="num">9.3 months</td><td class="num">285 %</td></tr>
+      <tr><td><strong>Base</strong></td><td class="num">117,922 <span class="muted">(38 h / month)</span></td><td class="num">1 per 5 years × 300,000 = 60,000</td><td class="num">177,922</td><td class="num">3.9 months</td><td class="num">812 %</td></tr>
+      <tr><td><strong>Optimistic</strong></td><td class="num">117,922 <span class="muted">(38 h / month)</span></td><td class="num">1 per 3 years × 800,000 = 266,667</td><td class="num">384,589</td><td class="num">1.8 months</td><td class="num">1,879 %</td></tr>
+    </tbody>
+  </table>
+  <ul class="rules mt-m small">
+    <li>Manual assessment today: 1 h / day of observation + 8 h / month of reporting = 38 h / month<span class="est">team estimate</span></li>
+    <li>OSH manager at NT$258.6 / h = NT$45,000 / month ÷ 174 h<span class="est">team estimate</span>; for scale, the 2026 minimum wage is NT$29,500 / month<sup class="ref">R6</sup></li>
+    <li>Indirect cost of one WMSD incident: NT$100,000–800,000<span class="est">team estimate</span></li>
+    <li>CAPEX NT$58,090; OPEX NT$1,300 / year = 14.5 W × 8,760 h at NT$3–4 / kWh (≈ NT$381–508) + 10 % of hardware<span class="est">team estimate</span></li>
+    <li>Sensitivity: base-case benefit halved → payback 8.0 months<span class="est">team estimate</span></li>
+  </ul>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">A2 / 3</span></div>
+</section>
+
+<!-- ============================== A3 Claim grades ============================== -->
+<section class="slide appendix">
+  <h1>Claim grades</h1>
+  <p class="lede">Every number in this deck traces to a row in our claims ledger, graded by where it comes from.</p>
+  <div>
+    <div class="grade"><div class="gname">Official or measured</div><div class="count">16</div><p>Official statistics and statutes, public prices and specifications, the published REBA/RULA methods, and our own measurements.</p></div>
+    <div class="grade"><div class="gname">Published</div><div class="count">6</div><p>Press, research papers, market surveys and vendor claims, cited with their year.</p></div>
+    <div class="grade"><div class="gname">Team estimate</div><div class="count">16</div><p>Our own assumptions and anything computed from them. Every one is marked <span class="est">team estimate</span> on its slide.</p></div>
+  </div>
+  <p class="small muted mt-m">The ledger is <code>deck/claims.md</code> in the repository (slide 18): value, source, grade and slide for every row.</p>
+  <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">A3 / 3</span></div>
+</section>
+
+</body>
+</html>

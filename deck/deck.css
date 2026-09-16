@@ -119,3 +119,181 @@ ol.refs a { color: var(--blue); text-decoration: none; word-break: break-all; }
 .chart { width: 100%; }
 .chart .grid line { stroke: var(--rule); stroke-width: 1; }
 .chart .axis text { fill: var(--steel); font-size: 20px; }
+
+/* ===================== Added for slides.html (components; no existing class restyled) ===================== */
+
+/* Hidden SVG that carries shared <defs> (arrowheads) */
+svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* Ruler: labels aligned to the 4px cell gaps, grouped per REBA band; optional marked cell */
+.ruler + .ruler-labels { column-gap: 4px; font-size: 22px; }
+.ruler-labels .g1 { grid-column: span 1; } .ruler-labels .g2 { grid-column: span 2; }
+.ruler-labels .g3 { grid-column: span 3; } .ruler-labels .g4 { grid-column: span 4; }
+.ruler-labels .g5 { grid-column: span 5; }
+.ruler-labels b { display: block; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.ruler span.on { outline: 3px solid var(--ink); outline-offset: 3px; }
+.ruler-cap { font-size: 20px; color: var(--steel); margin: 12px 0 0; }
+.title .ruler-block { margin-top: 120px; }
+.title .ruler-labels { font-size: 24px; color: #9AA7B4; }
+.title .ruler-labels b { color: #E3E8ED; }
+.title .ruler-cap { color: #9AA7B4; font-size: 22px; }
+.title sup.ref { color: #8FB0F0; }
+
+/* Titles wrap in balanced lines (no orphan word) */
+.slide h1 { text-wrap: balance; }
+.nw { white-space: nowrap; }
+/* REBA High band (8–10) chip, same colour as .ruler .b4; always carries the word */
+.chip.high { background: #E4692F; }
+
+/* Spacing helpers */
+.mt-s { margin-top: 20px; } .mt-m { margin-top: 36px; } .mt-l { margin-top: 56px; }
+.head-gap { height: 26px; }
+.gap-l { gap: 88px; }
+
+/* A process told as a short sequence of statements (slide 2) */
+.flow { list-style: none; padding: 0; margin: 0; }
+.flow li { position: relative; padding: 0 0 34px 48px; margin: 0; }
+.flow li::before { content: ''; position: absolute; left: 4px; top: 13px; width: 16px; height: 16px; border-radius: 50%; background: var(--blue); }
+.flow li::after { content: ''; position: absolute; left: 11px; top: 36px; bottom: 6px; width: 2px; background: var(--rule); }
+.flow li:last-child::after { display: none; }
+.flow li b { display: block; font-family: var(--cond); font-size: 36px; font-weight: 600; line-height: 1.15; margin-bottom: 4px; }
+
+/* Consequence rows: keyword + explanation (slide 2) */
+.point { display: grid; grid-template-columns: 240px 1fr; gap: 28px; padding: 22px 0; border-top: 1.5px solid var(--rule); }
+.point:last-child { border-bottom: 1.5px solid var(--rule); }
+.point .k { font-family: var(--cond); font-weight: 700; font-size: 40px; line-height: 1.05; }
+.point p { margin: 0; }
+.closer { position: absolute; left: 96px; right: 96px; bottom: 104px; margin: 0; padding-top: 20px; border-top: 3px solid var(--ink); font-family: var(--cond); font-weight: 600; font-size: 36px; line-height: 1.2; }
+
+/* Pillars: three parallel arguments (slide 3) */
+.pillar { border-top: 4px solid var(--ink); padding-top: 20px; }
+.pillar .label { font-size: 24px; color: var(--steel); margin: 0 0 6px; }
+.pillar .display { font-family: var(--cond); font-weight: 700; font-size: 72px; line-height: 1.02; letter-spacing: -0.01em; margin: 0 0 18px; min-height: 148px; }
+.pillar p:last-child { font-size: 30px; line-height: 1.4; }
+.pillar .display small { display: block; font-family: var(--font); font-weight: 400; font-size: 24px; letter-spacing: 0; color: var(--steel); margin-top: 8px; line-height: 1.3; }
+
+/* Definition table: row headers on the left (slides 4, 13) */
+table.def th[scope=row] { font-family: var(--cond); font-weight: 600; font-size: 32px; border-bottom: 1.5px solid var(--rule); width: 360px; padding: 18px 14px; vertical-align: top; line-height: 1.15; }
+table.def td { padding: 18px 14px; font-size: 27px; }
+table.def td .sub { display: block; color: var(--steel); font-size: 24px; margin-top: 4px; }
+
+/* Four-step sequence (slide 6) */
+.steps.four { grid-template-columns: repeat(4, 1fr); gap: 40px; }
+.steps.four .step b { font-size: 34px; }
+.steps.four .step p { font-size: 28px; line-height: 1.38; margin: 0 0 10px; }
+.steps .num { font-family: var(--cond); font-weight: 600; font-size: 24px; color: var(--blue); display: block; margin-bottom: 2px; }
+
+/* Two-path comparison (slide 7) */
+.path { border-top: 4px solid var(--ink); padding-top: 20px; }
+.path.soft { border-top-color: var(--rule); }
+.chain { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 6px 0 26px; }
+.chain span { font-family: var(--mono); font-size: 24px; border: 2px solid var(--ink); border-radius: 4px; padding: 4px 14px; }
+.chain i { font-style: normal; color: var(--blue); font-weight: 600; }
+.path ul { list-style: none; padding: 0; }
+.path li { padding: 18px 0; border-bottom: 1.5px solid var(--rule); margin: 0; font-size: 30px; }
+.path li b { font-weight: 600; }
+.bottom-line { position: absolute; left: 96px; right: 96px; bottom: 104px; }
+
+/* Plain list with rules (slides 8, 11) */
+ul.rules { list-style: none; padding: 0; margin: 0 0 30px; }
+ul.rules li { padding: 9px 0; border-bottom: 1.5px solid var(--rule); margin: 0; }
+ul.rules li:first-child { border-top: 1.5px solid var(--rule); }
+table.compact { font-size: 24px; }
+table.compact td, table.compact th { padding: 9px 10px; }
+table.compact th { white-space: nowrap; }
+
+/* Fact rows with a big figure (slide 10) */
+.fact { display: grid; grid-template-columns: 400px 1fr; gap: 32px; align-items: center; padding: 24px 0; border-top: 1.5px solid var(--rule); }
+.fact:last-child { border-bottom: 1.5px solid var(--rule); }
+.fact p { margin: 0; }
+.fact .big.word { font-size: 96px; }
+
+/* Manager's view mock (slide 11) */
+.notice { border: 2.5px solid var(--ink); border-radius: 10px; padding: 24px 28px; background: #fff; }
+.notice .line1 { font-family: var(--cond); font-weight: 600; font-size: 40px; line-height: 1.2; }
+.notice .line2 { font-size: 28px; margin-top: 8px; }
+.notice .who { margin-top: 16px; padding-top: 14px; border-top: 1.5px solid var(--rule); color: var(--steel); font-size: 24px; }
+
+/* Sequence list with numbers (slides 12, 16) */
+ol.beats { padding-left: 34px; margin: 0; }
+ol.beats li { padding-left: 6px; margin-bottom: 14px; }
+ol.beats li::marker { font-family: var(--cond); font-weight: 600; color: var(--blue); }
+.limits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+.limits > div { border-top: 2px solid var(--ink); padding-top: 12px; font-size: 24px; line-height: 1.35; }
+.limits b { display: block; font-family: var(--cond); font-weight: 600; font-size: 28px; margin-bottom: 4px; }
+
+/* Validation targets (slide 13) */
+table.targets { font-size: 28px; }
+table.targets td { padding: 22px 14px; vertical-align: baseline; }
+table.targets td.t { font-family: var(--cond); font-weight: 600; font-size: 38px; line-height: 1.15; }
+
+/* Roadmap risks (slide 16) */
+table.risks { font-size: 27px; }
+table.risks td, table.risks th { padding: 13px 12px; }
+
+/* ROI (slide 14) */
+.payback { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 2px; text-align: center; }
+.payback .big { font-size: 104px; }
+.payback .fig-label { margin-top: 2px; }
+.hl { background: var(--blue-soft); }
+
+/* Comparison table (slide 15) */
+table.cmp { font-size: 28px; }
+table.cmp td { padding: 18px 14px; }
+table.cmp th { vertical-align: bottom; font-size: 30px; line-height: 1.25; font-family: var(--cond); }
+table.cmp th .who { display: block; font-family: var(--font); font-weight: 400; color: var(--steel); font-size: 22px; margin-top: 4px; }
+table.cmp td:first-child { font-weight: 600; width: 380px; }
+table.cmp td b { font-weight: 600; }
+table.cmp td.hl, table.cmp th.hl { background: var(--blue-soft); }
+.footnote { font-size: 22px; color: var(--steel); margin-top: 20px; }
+
+/* Team (slide 17) */
+.team-name { font-family: var(--cond); font-weight: 700; font-size: 72px; line-height: 1; color: var(--steel); margin: 0 0 64px; }
+.members { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; }
+.member { border-top: 4px solid var(--blue); padding-top: 22px; }
+.member h2 { font-size: 52px; margin-bottom: 8px; }
+.member .role { font-weight: 600; font-size: 30px; margin-bottom: 14px; }
+.member p { font-size: 30px; line-height: 1.4; }
+.members { grid-template-columns: repeat(3, 1fr); }
+
+/* References with R-numbers (slide 18) */
+ol.refs.rn { list-style: none; counter-reset: r; padding-left: 0; }
+ol.refs.rn li { counter-increment: r; position: relative; padding-left: 56px; }
+ol.refs.rn li::before { content: 'R' counter(r); position: absolute; left: 0; font-family: var(--cond); font-weight: 600; color: var(--blue); }
+.url { color: var(--blue); overflow-wrap: anywhere; }
+.gh { font-size: 28px; margin-top: 18px; padding-top: 16px; border-top: 3px solid var(--ink); }
+
+/* Appendix tables and formulas */
+table.dense { font-size: 22px; }
+table.dense th { font-size: 22px; padding: 8px 10px 10px; }
+table.dense td { padding: 9px 10px; line-height: 1.3; }
+.formula { font-family: var(--cond); font-weight: 600; font-size: 34px; margin: 0 0 8px; }
+.grade { display: grid; grid-template-columns: 330px 140px 1fr; gap: 28px; align-items: baseline; padding: 22px 0; border-top: 1.5px solid var(--rule); }
+.grade:last-child { border-bottom: 1.5px solid var(--rule); }
+.grade .gname { font-family: var(--cond); font-weight: 700; font-size: 38px; }
+.grade .count { font-family: var(--cond); font-weight: 700; font-size: 64px; line-height: 1; }
+.grade p { margin: 0; }
+
+/* Diagram primitives for inline SVG */
+svg .box { fill: var(--paper); stroke: var(--ink); stroke-width: 2.5; }
+svg .box-white { fill: #fff; stroke: var(--ink); stroke-width: 2.5; }
+svg .box-panel { fill: var(--panel); stroke: none; }
+svg .box-soft { fill: var(--blue-soft); stroke: none; }
+svg .box-blue { fill: var(--blue); stroke: none; }
+svg .ln { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+svg .ln-thick { fill: none; stroke: var(--ink); stroke-width: 4; stroke-linecap: round; }
+svg .ln-steel { fill: none; stroke: var(--steel); stroke-width: 2; stroke-linecap: round; }
+svg .ln-rule { fill: none; stroke: var(--rule); stroke-width: 2; }
+svg .arrow { fill: none; stroke: var(--blue); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#ah); }
+svg .bone { fill: none; stroke: var(--blue); stroke-width: 5; stroke-linecap: round; }
+svg .bone-muted { fill: none; stroke: var(--rule); stroke-width: 5; stroke-linecap: round; }
+svg .joint { fill: var(--ink); }
+svg .f-ink { fill: var(--ink); } svg .f-blue { fill: var(--blue); } svg .f-steel { fill: var(--steel); }
+svg .f-soft { fill: var(--blue-soft); } svg .f-mid { fill: #7D9EDC; } svg .f-panel { fill: var(--panel); }
+svg .f-ok { fill: var(--ok); } svg .f-warn { fill: var(--warn); } svg .f-bad { fill: var(--bad); }
+svg .tint-ok { fill: var(--ok); fill-opacity: .16; } svg .tint-warn { fill: var(--warn); fill-opacity: .18; } svg .tint-bad { fill: var(--bad); fill-opacity: .14; }
+svg .t-20 { font-size: 20px; } svg .t-22 { font-size: 22px; } svg .t-24 { font-size: 24px; }
+svg .t-26 { font-size: 26px; } svg .t-28 { font-size: 28px; } svg .t-32 { font-size: 32px; }
+svg .t-b { font-weight: 600; } svg .t-mono { font-family: var(--mono); }
+svg .t-white { fill: #fff; } svg .t-blue { fill: var(--blue); }
+svg .t-mid { text-anchor: middle; } svg .t-end { text-anchor: end; }
