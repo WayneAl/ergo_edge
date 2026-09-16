@@ -1,7 +1,7 @@
 # STATUS — ergo_edge
 
 ## Plans
-- ⏳ DESIGN — Stage I proposal deck: `docs/superpowers/specs/2026-09-16-stage1-proposal-deck-design.md` (awaiting approval of open decisions A–F)
+- 🔨 EXECUTING — Stage I proposal deck: spec `docs/superpowers/specs/2026-09-16-stage1-proposal-deck-design.md` (decisions locked) → plan `docs/superpowers/plans/2026-09-16-stage1-deck.md` (Opus executor)
 
 ## What's next
 - Sub-project 1: Stage I proposal deck (English PDF, ≤20 body pages).
