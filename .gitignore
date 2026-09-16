@@ -1,0 +1,12 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+.claude/worktrees/
+.claude/sdd/
+deck/dist/
+data/
+*.pt
+*.hef
