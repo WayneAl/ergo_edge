@@ -1,7 +1,7 @@
 # STATUS — ergo_edge
 
 ## Plans
-- 🔨 EXECUTING — Stage I proposal deck: spec `docs/superpowers/specs/2026-09-16-stage1-proposal-deck-design.md` (decisions locked) → plan `docs/superpowers/plans/2026-09-16-stage1-deck.md` (Opus executor)
+- 🟡 DRAFT DONE — Stage I proposal deck: `deck/dist/proposal.pdf` via `make pdf` (18 body + 3 appendix). Built by Opus from plan `docs/superpowers/plans/2026-09-16-stage1-deck.md`, review pass 1 at 5452d21 (facts re-verified, roadmap fitted to contest calendar). `make check` blocks final on: slide-12 Hailo FPS TODO, TEAM_NAME / MEMBER_NAME.
 
 ## What's next
 - Sub-project 1: Stage I proposal deck (English PDF, ≤20 body pages).

@@ -28,8 +28,8 @@ Non-goals: prototype code and the 3-min video (sub-project 2, own spec); filling
 
 ## Interfaces
 - `make pdf` → headless Chrome `--print-to-pdf`, `@page { size: 1920px 1080px; margin: 0 }` → `deck/dist/proposal.pdf`.
-- `make check` → PDF pages == `.slide` count (catches overflow), body pages ≤20, size ≤15 MB, no CJK glyphs,
-  no `TODO` left; `make png` → one PNG per page for visual review.
+- `make check` → PDF pages == `.slide` count, safe-area overflow probe, body pages ≤20, size ≤15 MB, no CJK,
+  no `TODO` / `TEAM_NAME` / `MEMBER_NAME` left; `make png` → one PNG per page for visual review.
 
 ## Invariants & failure modes
 - Slides clip (`overflow: hidden`), so overflow never adds a page: `make check` measures every element in
@@ -53,7 +53,7 @@ B. Evidence: deck is written now with every slide except 12 final; the laptop pr
    own spec) fills slide 12 and feeds the video. `make check` blocks the final build while 12 carries a TODO.
 C. Reuse: copy golf_coach's pose front half into `src/` when sub-project 2 starts; no shared package.
 D. ASUS angle: ASUS keeps some own sites (Luzhu/Guishan TW, Ostrava CZ, Juárez MX, Suzhou/Chongqing CN —
-   🟡 aggregator source) but most assembly is at ODMs (Pegatron). Slide 16 phrases it as the Stage II ask:
+   🟡 aggregator source) but most assembly is at ODMs (Pegatron). Slide 16 phrases it as the post-finals ask:
    "a pilot station on an ASUS-owned line or an ASUS ODM partner line", never as a fact about ASUS factories.
 E. Product name: **LineSafe** ("ErgoEdge" is CerebrumEdge's product — now listed as a competitor on slide
    15; "ErgoNode" is a PIM vendor). Repo name stays `ergo_edge`.
