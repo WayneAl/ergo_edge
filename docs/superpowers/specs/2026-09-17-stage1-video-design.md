@@ -12,12 +12,15 @@ Beats (from slide 12): 1 problem (slide 2) · 2 approach (slide 5) · 3 live dem
 alert, network cable pulled and scoring continues · 4 dashboard on the phone · 5 privacy, Stage II, GitHub link.
 
 ## Data structures
-- `Shot(id, visual, narration, hold_s, lead_s)`; visual = `Still(png)` | `Clip(path, in_s, out_s)` |
-  `Inset(main: Clip, pip: Clip)`. One TOML row per beat; editing the video means editing that file.
+- `Shot(id, visual, narration, lead_s, hold_s)`; visual = `Still(page, png)` | `Clip(path, in_s, out_s, crop)` |
+  `Inset(main: Clip, pip: Clip)`. One TOML row per beat; editing the video means editing that file. One footage file
+  can feed several consecutive shots (different in/out), which is how narration lines up with the action.
 - `Voice(shot_id, mp3, words: list[WordTiming], dur_s)`, cached at `video/build/tts/<sha1(voice+text)>` — rebuilds stay
   offline; changing one line re-synthesizes one shot.
-- `Placed(shot, t0, dur)`: Still → dur = voice + hold_s; Clip → dur = out_s − in_s, narration starts at t0 + lead_s.
-- `Cue(t0, t1, text)` → ASS, ≤42 chars per line (yt_audiobook LANDSCAPE).
+- `Placed(shot, t0, dur)`: narration starts at t0 + lead_s. Still → dur = lead_s + voice + hold_s; Clip → dur = out_s −
+  in_s. Every dur is rounded up to a whole frame at 30 fps so video and narration timelines cannot drift.
+- `Cue(t0, t1, text)` → ASS, ≤42 chars per line (yt_audiobook LANDSCAPE). Cue text is the script's own substring —
+  Edge drops punctuation and splits `REBA/RULA` into three tokens, so tokens only supply the timing.
 
 ## Interfaces (`video/`, run like the deck: `uv run --no-project --with edge-tts python`)
 - `tts.synthesize(text, voice) -> (bytes, list[WordTiming])` — copied from yt_audiobook `EdgeTTSProvider`, not imported.
@@ -34,7 +37,10 @@ alert, network cable pulled and scoring continues · 4 dashboard on the phone ·
 - Footage is real time: the overlay FPS is whatever was captured. Narration says the demo runs on the laptop today and on
   the UGen300 in Stage II — never implies the accelerator is in the shot.
 - Every number spoken is a row in `deck/claims.md`; 🔴 rows are spoken as "we estimate".
-- Missing footage → fail naming the shot; `DRAFT=1` renders a labelled grey placeholder instead.
+- Missing footage → fail naming the shot; `DRAFT=1` renders a labelled grey placeholder instead and writes
+  `linesafe_stage1_DRAFT.mp4`, so a draft is never mistaken for the upload.
+- Captions use the deck font. libass cannot open the deck's woff2 files and silently falls back to Helvetica, so the
+  build converts them to TTF and fails if ffmpeg's fontselect does not resolve to IBM Plex Sans.
 - Edge TTS unreachable → cache; no cache → fail. Zero WordBoundary events → fail (edge-tts 7 defaults to sentences).
 - Nothing identifying on screen besides the builder: no terminal history, Wi-Fi name, or LAN IP in captured frames.
 
