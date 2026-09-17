@@ -2,7 +2,7 @@
 
 ## Plans
 - 🟡 DRAFT DONE — Stage I proposal deck: `deck/dist/proposal.pdf` via `make pdf` (18 body + 3 appendix), reviewed and fact-checked. `make check` blocks final only on slide 12's prototype-evidence TODO. No UGen300 before Stage I (finalist unit only); slide 12 cites Hailo's published Hailo-10H FPS.
-- 🔨 EXECUTING — laptop prototype (sub-project 2): spec `docs/superpowers/specs/2026-09-17-laptop-prototype-design.md` (decisions locked) → plan `docs/superpowers/plans/2026-09-17-laptop-prototype.md` (9 subagent tasks + Task 10 live session with Wayne), branch `prototype` in `.claude/worktrees/prototype`, ledger `.claude/sdd/2026-09-17-laptop-prototype/progress.md`
+- 🟡 BUILT, AWAITING LIVE SAMPLE — laptop prototype (sub-project 2): branch `prototype` (worktree `.claude/worktrees/prototype`, head 6ca8b14) — 9 plan tasks done, each reviewed + fix rounds, final whole-branch review fixed; 352 tests; real e2e sample done on a GolfDB clip (extract with ultralytics → replay → SQLite → web API). NOT merged: the camera path (`run`, `record`) needs Task 10 with Wayne — guide `docs/evidence/task10-session-guide.md`. Ledger `.claude/sdd/2026-09-17-laptop-prototype/progress.md`.
 
 ## What's next
 - Sub-project 1: Stage I proposal deck (English PDF, ≤20 body pages).
