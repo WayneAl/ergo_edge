@@ -139,3 +139,26 @@ def test_overlapping_bigger_bystander_with_lower_iou_does_not_steal_lock():
     target = det(10, 0, 210, 400)      # IoU 76000/84000 = 0.905, area 80000
     p = tr.update(1 / 30, [bystander, target])
     assert p.bbox == target.bbox
+
+# --- final review ----------------------------------------------------------------
+
+def test_track_id_counts_seeds_not_matches():
+    tr = Tracker()
+    assert tr.track_id == 0
+    tr.update(0.0, [])
+    bad = det(0, 0, 200, 400); bad.conf[K.L_ANKLE] = 0.0; bad.kpts[K.L_ANKLE, 1] = np.nan
+    with pytest.raises(ValueError, match="Detection.kpts"):
+        tr.update(0.05, [bad])
+    assert tr.track_id == 0                                   # nothing seeded yet, a rejected seed leaves no trace
+    tr.update(0.1, [det(0, 0, 200, 400)])
+    assert tr.track_id == 1                                   # first lock
+    tr.update(0.2, [det(2, 0, 202, 400)])
+    assert tr.track_id == 1                                   # match
+    assert tr.update(0.5, []) is None and tr.track_id == 1    # short miss (0.3 s)
+    tr.update(0.6, [det(4, 0, 204, 400)])
+    assert tr.track_id == 1                                   # match after a short miss
+    p = tr.update(1.2, [det(900, 0, 1500, 900)])              # 0.6 s since the last match: lost, re-seed
+    assert p.bbox == (900.0, 0.0, 1500.0, 900.0) and tr.track_id == 2
+    assert tr.update(2.0, []) is None and not tr.locked and tr.track_id == 2   # lock dropped, nobody seeded
+    tr.update(2.1, [det(0, 0, 200, 400)])
+    assert tr.track_id == 3

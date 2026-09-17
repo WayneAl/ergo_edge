@@ -10,6 +10,10 @@ wall-clock time while the pipeline itself never sees a clock jump.
 Only SIDE frames are scored: a FRONT frame gets angles with every flexion ``Missing`` at
 once. ``wrong_view`` (FRONT for ``wrong_view_s``) only decides when the banner appears; a
 frame without a pose neither advances nor resets that debounce, a SIDE frame resets it.
+
+Activity history (static / repeated / rapid) belongs to one person: whenever the tracker
+seeds a new lock (``Tracker.track_id`` changes) the activity tracker starts fresh. The event
+detector is per station and is never reset.
 """
 
 from __future__ import annotations
@@ -86,6 +90,7 @@ class Pipeline:
         self.wall_offset = float(wall_offset)
         self._tracker = Tracker(params.tracker, roi=cfg.roi)
         self._activity = ActivityTracker(params.activity)
+        self._track_id = self._tracker.track_id  # a change means a new person: fresh activity history
         self._events = EventDetector(cfg.station_id, params.events)
         self._front_since: float | None = None  # t of the first frame of the current FRONT run
         self._last_status_t: float | None = None
@@ -102,6 +107,9 @@ class Pipeline:
         p = self.params
         dets = self.backend.infer(frame_bgr, idx)
         pose = self._tracker.update(t, dets)
+        if self._tracker.track_id != self._track_id:
+            self._track_id = self._tracker.track_id
+            self._activity = ActivityTracker(p.activity)
 
         view: View | None = None
         wrong_view = False

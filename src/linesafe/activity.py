@@ -11,7 +11,8 @@ A frame with ``angles is None`` or a missing signal adds no sample to that signa
     least ``span`` seconds without a gap longer than ``max_gap_s``, and its last
     sample is no older than ``max_gap_s``.
   * *actions(signal)*: reversals of at least ``rep_amp_deg`` travel within the last
-    ``window_s`` seconds, halved (a flex-and-return is one action). The first
+    ``window_s`` seconds, plus one, halved (a flex-and-return is one action; N of them
+    followed by rest confirm only 2N - 1 reversals, the last return never is). The first
     direction is set once the signal has travelled ``rep_amp_deg`` from its lowest or
     highest value since the first sample or the last gap, so a start mid-swing counts.
   * *rapid*: the trunk ranged by at least ``rapid_deg`` within ``rapid_window_s``
@@ -136,7 +137,7 @@ class _Signal:
     def actions(self, t: float, p: ActivityParams) -> int:
         while self.reversals and self.reversals[0] < t - p.window_s:
             self.reversals.popleft()
-        return len(self.reversals) // 2
+        return (len(self.reversals) + 1) // 2
 
 
 class _RangeWindow:

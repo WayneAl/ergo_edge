@@ -1,6 +1,7 @@
 import json
 import math
 import sys
+import time
 import types
 
 import cv2
@@ -16,6 +17,7 @@ from linesafe.pipeline import FrameResult
 from linesafe.activity import ActivityFlags
 from linesafe.pose import PoseFrame
 from linesafe.reba import score_reba
+from linesafe.store import EventStore
 from tests.synth import session, side_pose
 
 runner = CliRunner()
@@ -162,3 +164,88 @@ def test_web_refuses_a_missing_database(tmp_path, monkeypatch):
     res = runner.invoke(app, ["web", "--db", str(db)])
     assert res.exit_code == 2 and "missing.db" in res.output and "does not exist" in res.output
     assert not db.exists() and served == []   # no empty store is created, nothing is served
+
+
+# --- final review -------------------------------------------------------------------
+
+
+def replay_to_db(tmp_path, *extra):
+    raw, kp, st = write_inputs(tmp_path)
+    db, ev = tmp_path / "e.db", tmp_path / "events.json"
+    res = runner.invoke(app, ["replay", "--keypoints", str(kp), "--station", str(st), "--db", str(db),
+                              "--events-out", str(ev), *extra])
+    assert res.exit_code == 0, res.output
+    store = EventStore(db)
+    try:
+        rows, status = store.events(), store.status()
+    finally:
+        store.close()
+    events = json.loads(ev.read_text(encoding="utf-8"))
+    assert len(rows) == 1 and len(events) == 1 and len(status) == 1
+    return raw, rows[0], events[0], status[0]
+
+
+def test_replay_db_uses_wall_start(tmp_path):
+    raw, row, event, status = replay_to_db(tmp_path, "--wall-start", "1000000")
+    assert row["t_start"] == pytest.approx(1_000_000 + event["t_start"])
+    assert row["t_end"] == pytest.approx(1_000_000 + event["t_end"])
+    assert 1_000_000 <= status["t"] <= 1_000_000 + (raw.n - 1) / raw.fps + 1e-6
+
+
+def test_replay_db_defaults_to_a_session_that_ends_now(tmp_path):
+    before = time.time()
+    raw, row, _, _ = replay_to_db(tmp_path)
+    after = time.time()
+    length = (raw.n - 1) / raw.fps
+    assert before - length - 5 <= row["t_start"] <= after + 5
+
+
+def test_replay_rejects_a_non_finite_wall_start(tmp_path):
+    _, kp, st = write_inputs(tmp_path, segments=((1, UPRIGHT),))
+    res = runner.invoke(app, ["replay", "--keypoints", str(kp), "--station", str(st), "--wall-start", "nan"])
+    assert res.exit_code == 2 and "--wall-start must be finite" in res.output
+
+
+class RecordingBackend:
+    name = "replay"
+
+    def __init__(self):
+        self.frames, self.closed = [], 0
+
+    def infer(self, frame_bgr, idx):
+        self.frames.append(idx)
+        return []
+
+    def close(self):
+        self.closed += 1
+
+
+def extract_setup(tmp_path, monkeypatch):
+    video = tmp_path / "clip.mp4"
+    cli.write_timed_video(synthetic_frames(5, 1 / 30), video)
+    backend, built = RecordingBackend(), []
+    monkeypatch.setattr(cli, "_make_live_backend", lambda *a: built.append(a) or backend)
+    return video, backend, built
+
+
+def test_extract_refuses_an_unwritable_out_before_inference(tmp_path, monkeypatch):
+    video, backend, built = extract_setup(tmp_path, monkeypatch)
+    (tmp_path / "file").write_text("x", encoding="utf-8")
+    out = tmp_path / "file" / "sub" / "k.json"   # a directory can never be made under a file
+    res = runner.invoke(app, ["extract", str(video), "--out", str(out)])
+    assert res.exit_code == 1 and isinstance(res.exception, SystemExit), res.exception
+    assert "--out" in res.output
+    assert backend.frames == [] and built == []   # failed fast: no backend built, no frame inferred
+
+
+def test_extract_save_error_exits_1(tmp_path, monkeypatch):
+    video, backend, _ = extract_setup(tmp_path, monkeypatch)
+
+    def disk_full(path, raw):
+        raise OSError("No space left on device")
+
+    monkeypatch.setattr("linesafe.detections.save_keypoints", disk_full)
+    res = runner.invoke(app, ["extract", str(video), "--out", str(tmp_path / "k.json")])
+    assert res.exit_code == 1 and isinstance(res.exception, SystemExit), res.exception
+    assert "--out" in res.output and "No space left" in res.output
+    assert backend.frames == [0, 1, 2, 3, 4] and backend.closed == 1

@@ -132,3 +132,18 @@ def test_store_writes_are_shifted_by_wall_offset(tmp_path):
     assert len(status) == 1 and status[0]["station"] == "S1"
     # Status is written at most every 0.5 s: the last write is within 0.5 s of the last frame.
     assert results[-1].t + offset - 0.5 < status[0]["t"] <= results[-1].t + offset + 1e-6
+
+
+def test_new_person_starts_a_fresh_activity_history(tmp_path):
+    a = session([(50, {"trunk_deg": 30.0})])                     # person A, static, hip at x 640
+    b = session([(15, {"trunk_deg": 35.0, "x0": 200.0})])        # person B, static, far from A: IoU 0
+    gap = [[] for _ in range(round(0.6 * FPS))]                   # > lost_s: the tracker drops A, then seeds B
+    raw = RawDetections(source="synth", fps=FPS, width=a.width, height=a.height, backend="synth",
+                        frames=a.frames + gap + b.frames)
+    backend = replay(tmp_path, raw)
+    results, _ = run_all(Pipeline(backend, StationConfig(station_id="S1")), backend)
+    b0 = a.n + len(gap)
+    r = results[b0 + round(10 * FPS)]                             # B's t + 10 s = 60.6 s since A appeared
+    assert r.pose is not None and r.pose.bbox[2] < 400            # the tracked person is B
+    # 30° and 35° stay within the 10° band and the 0.6 s gap is under max_gap_s: one history would be static
+    assert r.activity.static is False

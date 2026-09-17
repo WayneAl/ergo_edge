@@ -117,3 +117,28 @@ def test_time_must_increase_and_rejected_input_leaves_no_trace():
     with pytest.raises(ValueError, match=r"angles\.trunk_flex"):
         tr.update(2.0, ang(float("nan")))
     tr.update(2.0, ang(30))                                   # the rejected call at t = 2.0 consumed nothing
+
+# --- final review ----------------------------------------------------------------
+
+def burst(cycles):
+    # `cycles` triangle bends 0 -> 30 -> 0°, 2 s each, then 0°: the last return is never confirmed as a reversal
+    def fn(t):
+        if t >= 2 * cycles:
+            return ang(0)
+        phase = t % 2.0
+        return ang(30 * phase if phase <= 1 else 30 * (2 - phase))
+    return fn
+
+def test_five_bends_then_rest_is_repeated():
+    _, f = run(burst(5), 15)                                  # 9 reversals = 5 actions > 4
+    assert f.repeated is True
+
+def test_four_bends_then_rest_is_muscle_use_not_repeated():
+    _, f = run(burst(4), 13)                                  # 7 reversals = 4 actions: not > 4, but >= 4
+    assert f.repeated is False and f.rula_muscle_use is True
+
+def test_one_bend_then_rest_is_one_action():
+    _, f = run(burst(1), 7, ActivityTracker(ActivityParams(rep_per_min=0)))   # 1 reversal = 1 action > 0
+    assert f.repeated is True
+    _, f = run(burst(1), 7, ActivityTracker(ActivityParams(rep_per_min=1)))   # ... and not > 1
+    assert f.repeated is False and f.rula_muscle_use is True

@@ -12,6 +12,8 @@ Lock rules:
     lock while the target still overlaps. The ROI is not applied to matching.
   * No match for longer than ``lost_s``: drop the lock, reset all smoothing
     state, and re-seed from the same frame's detections.
+  * ``track_id`` is 0 before any seed and goes up by one on every seed (the first
+    lock and every re-seed); a match never changes it.
 
 Units: pixels (x right, y down) for keypoints and bbox, seconds for time.
 """
@@ -120,11 +122,17 @@ class Tracker:
         self._last_bbox: tuple[float, float, float, float] | None = None
         self._last_matched_t: float | None = None
         self._last_t: float | None = None  # last t passed to update, any call
+        self._track_id = 0
         self._reset_keypoints()
 
     @property
     def locked(self) -> bool:
         return self._locked
+
+    @property
+    def track_id(self) -> int:
+        """0 before any seed; incremented on every seed (first lock and every re-seed)."""
+        return self._track_id
 
     def _reset_keypoints(self) -> None:
         for pair in self._filters:
@@ -203,6 +211,7 @@ class Tracker:
         # Decide what this frame does without touching state.
         chosen: Detection | None = None
         lost = False
+        seeded = False
         if self._locked:
             chosen = self._match(dets)
             if chosen is None:
@@ -210,6 +219,7 @@ class Tracker:
                 lost = t - self._last_matched_t > p.lost_s
         if chosen is None and (lost or not self._locked):
             chosen = self._seed(dets)
+            seeded = chosen is not None
         if chosen is not None:
             if not np.isfinite(chosen.conf).all():
                 raise ValueError(
@@ -231,6 +241,8 @@ class Tracker:
             self._reset_keypoints()
         if chosen is None:
             return None
+        if seeded:
+            self._track_id += 1
 
         kpts = np.empty((K.N_KPTS, 2), np.float32)
         conf = np.empty(K.N_KPTS, np.float32)

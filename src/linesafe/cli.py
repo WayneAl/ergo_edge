@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import time
 from collections.abc import Iterable
@@ -47,6 +48,22 @@ def _load_station(path: Path):
         return load_station(path)
     except (OSError, ValueError) as exc:  # tomllib.TOMLDecodeError is a ValueError
         raise _fail(f"bad station file {path}: {exc}", 2) from exc
+
+
+def _check_out_writable(out: Path) -> None:
+    """Exit 1 naming ``--out`` unless ``out`` can be written: not a directory, not read-only, and its
+    nearest existing ancestor is a writable directory."""
+    try:
+        if out.is_dir() or (out.exists() and not os.access(out, os.W_OK)):
+            raise _fail(f"--out {out} is not a writable file", 1)
+        parent = out.parent
+        while not parent.exists():  # save_keypoints creates the missing directories
+            parent = parent.parent
+        writable = parent.is_dir() and os.access(parent, os.W_OK | os.X_OK)
+    except OSError as exc:  # e.g. PermissionError from exists() under an unreadable directory
+        raise _fail(f"cannot check --out {out}: {exc}", 1) from exc
+    if not writable:
+        raise _fail(f"--out {out}: {parent} is not a writable directory", 1)
 
 
 def _make_live_backend(name: str, device: str | None):
@@ -361,8 +378,13 @@ def replay(
     events_out: Path | None = typer.Option(None, help="JSON list of closed events."),
     render_dir: Path | None = typer.Option(None, help="Write overlay PNGs on a black canvas here."),
     render_every: int = typer.Option(15, min=1, help="Render every N-th frame."),
+    wall_start: float | None = typer.Option(
+        None, help="Epoch seconds of the first frame in --db (default: the session ends now)."
+    ),
 ) -> None:
     """Run the pipeline over a keypoints file, time = frame index / fps."""
+    if wall_start is not None and not math.isfinite(wall_start):
+        raise _fail(f"--wall-start must be finite, got {wall_start}", 2)
     import cv2
     import numpy as np
 
@@ -388,7 +410,14 @@ def replay(
             fh = out.open("w", encoding="utf-8")
         if render_dir is not None:
             render_dir.mkdir(parents=True, exist_ok=True)
-        pipeline = Pipeline(pose_backend, cfg, store=store)
+        # Stored events and status get wall-clock time; without --wall-start the session ends now.
+        if wall_start is not None:
+            wall_offset = wall_start
+        elif db is not None:
+            wall_offset = time.time() - (raw.n - 1) / raw.fps
+        else:
+            wall_offset = 0.0
+        pipeline = Pipeline(pose_backend, cfg, store=store, wall_offset=wall_offset)
         for idx in range(raw.n):
             r = pipeline.step(idx / raw.fps, None, idx, raw.fps)
             reba, rula = r.reba, r.rula
@@ -442,6 +471,7 @@ def extract(
 
     if not video.exists():
         raise _fail(f"video not found: {video}", 1)
+    _check_out_writable(out)  # before the backend loads and inference runs
     pose_backend = _make_live_backend(backend, device)
     try:
         raw = extract_keypoints(video, pose_backend)
@@ -449,7 +479,10 @@ def extract(
         raise _fail(f"extract failed: {exc}", 1) from exc
     finally:
         pose_backend.close()
-    save_keypoints(out, raw)
+    try:
+        save_keypoints(out, raw)
+    except OSError as exc:
+        raise _fail(f"cannot write --out {out}: {exc}", 1) from exc
     typer.echo(f"frames={raw.n} fps={raw.fps:.3f} size={raw.width}x{raw.height} -> {out}")
 
 
