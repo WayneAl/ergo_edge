@@ -4,7 +4,7 @@ DIST := $(DECK)/dist
 PDF := $(DIST)/proposal.pdf
 PY := uv run --no-project --with pymupdf python
 
-.PHONY: pdf png check all clean
+.PHONY: pdf png check all clean video-test
 
 all: pdf check png
 
@@ -24,3 +24,6 @@ png: $(PDF)
 
 clean:
 	rm -rf $(DIST)
+
+video-test:
+	uv run --no-project --python 3.12 --with pytest python -m pytest video/tests -q

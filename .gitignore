@@ -10,3 +10,6 @@ deck/dist/
 data/
 *.pt
 *.hef
+video/build/
+video/dist/
+video/footage/
