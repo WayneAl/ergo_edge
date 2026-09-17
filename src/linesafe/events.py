@@ -5,8 +5,11 @@ A sample is *above* when it has a score whose total is at or above
 
 States:
   * IDLE -> PENDING when a sample is above (the event's start).
-  * PENDING -> ACTIVE once still above ``enter_s`` seconds after the start;
-    PENDING -> IDLE on any sample below (the run was too short).
+  * PENDING -> ACTIVE on a sample above at least ``enter_s`` seconds after the
+    start. A below run in PENDING (a dropped detection, a brief dip) keeps the
+    start, peak and drivers while it lasts no longer than ``pending_grace_s``;
+    longer, PENDING -> IDLE (the run was too short). A below run is measured from
+    its first below sample to the current one, like ``exit_s``.
   * ACTIVE stays open through dips shorter than ``exit_s``; after ``exit_s``
     seconds below it closes, :meth:`EventDetector.update` returns the
     :class:`Event`, and the detector is IDLE again.
@@ -30,12 +33,13 @@ class EventParams:
     enter_total: int = 8  # REBA High
     enter_s: float = 3.0
     exit_s: float = 3.0  # below High this long closes the event
+    pending_grace_s: float = 0.5  # PENDING survives a below run no longer than this
 
     def __post_init__(self) -> None:
         total = self.enter_total
         if isinstance(total, bool) or not isinstance(total, int) or not 1 <= total <= 15:
             raise ValueError(f"EventParams.enter_total must be an int 1..15, got {total!r}")
-        for name in ("enter_s", "exit_s"):
+        for name in ("enter_s", "exit_s", "pending_grace_s"):
             value = getattr(self, name)
             if (
                 isinstance(value, bool)
@@ -119,8 +123,12 @@ class EventDetector:
 
         if self._state == _PENDING:
             if not above:
-                self._reset()
+                if self._below_since is None:
+                    self._below_since = t
+                if t - self._below_since > self.params.pending_grace_s:
+                    self._reset()
                 return None
+            self._below_since = None
             self._track(t, score)
             if t - self._t_start >= self.params.enter_s:
                 self._state = _ACTIVE

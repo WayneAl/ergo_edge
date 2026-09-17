@@ -2,7 +2,7 @@ from dataclasses import replace
 
 import pytest
 
-from linesafe.events import EventDetector
+from linesafe.events import EventDetector, EventParams
 from linesafe.reba import RebaScore, Band
 
 FPS = 30
@@ -81,3 +81,27 @@ def test_time_must_strictly_increase():
         with pytest.raises(ValueError, match="t must"):
             d.update(t, sc(9))
     assert d.update(1.1, sc(9)) is None
+
+def test_pending_survives_a_short_dropout():
+    d = EventDetector("S1"); feed(d, [(2, 9), (0.2, None), (2, 9)])   # last t ≈ 4.167
+    assert d.active and d.flush().t_start == 0.0
+
+def test_pending_restarts_after_a_long_below_run():
+    d = EventDetector("S1"); feed(d, [(2, 9), (0.6, 5), (4, 9)])      # second above run starts at t ≈ 2.6
+    assert d.active and abs(d.flush().t_start - 2.6) < 1e-6
+
+def test_pending_grace_boundary_is_inclusive():
+    # exact binary timestamps 0.125 s apart; the below run is measured first below sample -> current below sample
+    d = EventDetector("S1")
+    for t in (i / 8 for i in range(40)):
+        d.update(t, None if 1.0 <= t <= 1.5 else sc(9))              # below 1.0 .. 1.5: exactly 0.5 s
+    assert d.active and d.flush().t_start == 0.0
+    d = EventDetector("S1")
+    for t in (i / 8 for i in range(40)):
+        d.update(t, None if 1.0 <= t <= 1.625 else sc(9))            # below 1.0 .. 1.625: 0.625 s
+    assert d.active and d.flush().t_start == 1.75
+
+def test_pending_grace_s_must_be_finite_and_non_negative():
+    for bad in (-0.1, float("nan"), True):
+        with pytest.raises(ValueError, match="pending_grace_s"):
+            EventParams(pending_grace_s=bad)
