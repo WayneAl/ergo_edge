@@ -10,3 +10,7 @@ deck/dist/
 data/
 *.pt
 *.hef
+pilot/
+*.db
+*.mp4
+yolov8*-pose.pt
