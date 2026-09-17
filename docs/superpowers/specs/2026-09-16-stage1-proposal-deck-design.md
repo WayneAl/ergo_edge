@@ -41,7 +41,7 @@ Non-goals: prototype code and the 3-min video (sub-project 2, own spec); filling
   placement guideline + κ validation. Stated as limits, not hidden.
 - ASUS-specific claims (e.g. an ASUS line as pilot site) go on a slide only after a fact check; until then
   they are phrased as the Stage II ask.
-- Slide 12 depends on sub-project 2; it carries a visible TODO so `make check` blocks a final build without it.
+- Slide 12 depends on sub-project 2 (laptop prototype); its TODO blocks a final build until the prototype evidence is in.
 
 ## Verification
 `make check` green on the final build; every page PNG reviewed for overflow and legibility at 50 % zoom;
@@ -49,8 +49,8 @@ one pass mapping each rubric criterion → the slides that earn it.
 
 ## Decisions (locked 2026-09-16, delegated by Wayne)
 A. Toolchain: HTML/CSS → headless Chrome PDF; fonts vendored (IBM Plex Sans / Sans Condensed / Mono).
-B. Evidence: deck is written now with every slide except 12 final; the laptop prototype (sub-project 2,
-   own spec) fills slide 12 and feeds the video. `make check` blocks the final build while 12 carries a TODO.
+B. Evidence: no UGen300 before Stage I (Wayne waits for the finalist unit, 2026-09-17). Slide 12 cites Hailo's
+   published Hailo-10H FPS with its conditions; the laptop prototype (sub-project 2) supplies our own evidence.
 C. Reuse: copy golf_coach's pose front half into `src/` when sub-project 2 starts; no shared package.
 D. ASUS angle: ASUS keeps some own sites (Luzhu/Guishan TW, Ostrava CZ, Juárez MX, Suzhou/Chongqing CN —
    🟡 aggregator source) but most assembly is at ODMs (Pegatron). Slide 16 phrases it as the post-finals ask:

@@ -525,6 +525,7 @@
 
 <!-- ============================== 12 Feasibility ============================== -->
 <section class="slide">
+  <!-- TODO: prototype evidence (REBA/RULA engine live on the laptop: FPS, worked-example tests, pilot check); retitle once it runs -->
   <h1>The pose front half already runs; the scoring tables are next.</h1>
   <div class="head-gap"></div>
   <div class="cols cols-2 gap-l">
@@ -535,8 +536,7 @@
       <ul class="rules mt-m">
         <li>One-Euro smoothing of keypoint tracks, and gap filling for short drop-outs</li>
         <li>Hailo <code>.hef</code> adapter written against the pyHailoRT 5.3 API — <strong>not yet run on hardware</strong></li>
-        <!-- TODO: hailo fps -->
-        <li class="muted">Hailo-10H throughput: measured in Stage II on the provided unit<sup class="ref">R21</sup></li>
+        <li>On Hailo-10H, Hailo publishes <strong>79 FPS</strong> for <code>yolov8m_pose</code> (640 px, batch 1, accelerator only)<sup class="ref">R24</sup>. It needs the 10 Gbps USB-C port: one UGen300 user’s throughput almost doubled after leaving a 5 Gbps link<sup class="ref">R25</sup>.</li>
       </ul>
     </div>
     <div>
@@ -740,6 +740,8 @@
     <li>ASUS UGen AI League — contest rules and calendar. <a class="url" href="https://contest.bhuntr.com/tw/39jg9vimiynrhlksze/home/">contest.bhuntr.com/<wbr>tw/<wbr>39jg9vimiynrhlksze/<wbr>home/<wbr></a></li>
     <li>MOL Bureau of Labor Insurance, occupational-disease benefit cases by cause and industry, Jan–Dec 2025 (open data). <a class="url" href="https://data.gov.tw/dataset/13332">data.gov.tw/<wbr>dataset/<wbr>13332</a></li>
     <li>Machine Design, How Voxel combines video feeds and AI to assess workplace safety. <a class="url" href="https://www.machinedesign.com/automation-iiot/article/21274068/voxel-ai-how-voxel-combines-video-feeds-and-ai-to-assess-and-mitigate-workplace-safety">machinedesign.com/<wbr>automation-iiot/<wbr>article/<wbr>21274068/<wbr></a></li>
+    <li>Hailo Model Zoo v5.4.0, Hailo-10H pose estimation benchmarks (host Intel i5-9400). <a class="url" href="https://github.com/hailo-ai/hailo_model_zoo/blob/master/docs/public_models/HAILO10H/HAILO10H_pose_estimation.rst">github.com/<wbr>hailo-ai/<wbr>hailo_model_zoo/<wbr>docs/<wbr>public_models/<wbr>HAILO10H/</a></li>
+    <li>Hailo Community, yolov8m FPS lower than Model Zoo on UGen300 (Hailo-10H), May–Jun 2026. <a class="url" href="https://community.hailo.ai/t/yolov8m-fps-lower-than-model-zoo-on-ugen300-hailo-10h/19320">community.hailo.ai/<wbr>t/<wbr>19320</a></li>
   </ol>
   <p class="gh"><strong>Code:</strong> <a class="url" href="https://github.com/WayneAl/ergo_edge">github.com/WayneAl/ergo_edge</a> — private during the contest; access granted to the jury on request.</p>
   <div class="foot"><span>LineSafe · ASUS UGen AI League · Stage I</span><span class="n">18 / 18</span></div>

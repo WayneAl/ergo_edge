@@ -1,11 +1,12 @@
 # STATUS — ergo_edge
 
 ## Plans
-- 🟡 DRAFT DONE — Stage I proposal deck: `deck/dist/proposal.pdf` via `make pdf` (18 body + 3 appendix). Built by Opus from plan `docs/superpowers/plans/2026-09-16-stage1-deck.md`, review pass 1 at 5452d21 (facts re-verified, roadmap fitted to contest calendar). `make check` blocks final on: slide-12 Hailo FPS TODO, TEAM_NAME / MEMBER_NAME.
+- 🟡 DRAFT DONE — Stage I proposal deck: `deck/dist/proposal.pdf` via `make pdf` (18 body + 3 appendix), reviewed and fact-checked. `make check` blocks final only on slide 12's prototype-evidence TODO. No UGen300 before Stage I (finalist unit only); slide 12 cites Hailo's published Hailo-10H FPS.
+- ⏳ DESIGN — laptop prototype (sub-project 2): `docs/superpowers/specs/2026-09-17-laptop-prototype-design.md` (awaiting approval of open decisions A–E)
 
 ## What's next
 - Sub-project 1: Stage I proposal deck (English PDF, ≤20 body pages).
-- Sub-project 2 (own spec): laptop prototype — pose (reused from `~/Documents/GitHub/golf_coach`) → REBA/RULA rule engine → live overlay; feeds deck slide 12 and the 3-min video.
+- Sub-project 2: laptop prototype — pose (copied from `~/Documents/GitHub/golf_coach`) → REBA/RULA rule engine → live overlay; feeds deck slide 12 and the 3-min video. Target: evidence + video recorded by ~2026-10-10 to leave submission buffer.
 - Deadline: Stage I 2026-10-14 17:00 Asia/Taipei. Submission needs deck PDF + signed IP/portrait consent PDF; GitHub link and YouTube video are optional fields but listed in the rules.
 
 ## Resumption recipe
