@@ -47,6 +47,7 @@ def build(shots_path: Path, draft: bool) -> None:
     print(f"total {total:.2f}s (max {script.max_total_s:.0f}s)")
 
     missing: dict[str, Path] = {}
+    lengths: dict[Path, float] = {}
     for p in placed:
         visual = p.shot.visual
         if isinstance(visual, Clip):
@@ -56,11 +57,16 @@ def build(shots_path: Path, draft: bool) -> None:
         else:
             paths = []
         for path in paths:
-            if not path.exists():
-                if not draft:
-                    raise VideoError(f"shot {p.shot.id}: missing footage {rel(path)} — see {GUIDE}, "
-                                     f"or build with DRAFT=1")
-                missing.setdefault(p.shot.id, path)
+            if path.exists():
+                if path not in lengths:
+                    lengths[path] = render.probe_duration(path)
+                continue
+            if not draft:
+                raise VideoError(f"shot {p.shot.id}: missing footage {rel(path)} — see {GUIDE}, "
+                                 f"or build with DRAFT=1")
+            missing.setdefault(p.shot.id, path)
+    # ffmpeg silently renders a short part when out_s lies past the end of the footage.
+    timeline.check_sources(script.shots, lengths)
     print(f"footage: DRAFT placeholders for {list(missing)}" if missing else "footage: all present")
 
     # Placeholders draw their label in the deck font, so the TTFs are needed before the parts.
@@ -90,6 +96,7 @@ def build(shots_path: Path, draft: bool) -> None:
         else:
             raise VideoError(f"shot {p.shot.id}: unknown visual {visual!r}")
         render.run(cmd, cwd=build_dir)
+        render.check_part(p.shot.id, p.dur, render.probe_duration(out))
         print(f"part {name}: {kind} {p.dur:.2f}s")
         listing.append(f"file 'parts/{name}.mp4'")
     list_file = build_dir / "parts.txt"

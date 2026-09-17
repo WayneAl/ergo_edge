@@ -1,7 +1,7 @@
 import pytest
 
 from lsvideo.model import VideoError
-from lsvideo.render import check_font
+from lsvideo.render import check_font, check_part
 
 OK = "[Parsed_subtitles_0 @ 0x141806a10] fontselect: (IBM Plex Sans, 400, 0) -> IBMPlexSans-Regular, 0, IBMPlexSans-Regular"
 FALLBACK = ("[Parsed_subtitles_0 @ 0x13f6151c0] fontselect: (IBM Plex Sans, 400, 0) -> "
@@ -20,3 +20,13 @@ def test_font_fallback_to_helvetica_fails():
 def test_missing_fontselect_line_fails():
     with pytest.raises(VideoError, match="no fontselect line for IBM Plex Sans"):
         check_font("frame=  100 fps=30")
+
+
+def test_part_shorter_than_planned_names_the_shot():
+    with pytest.raises(VideoError, match="shot dashboard: rendered part is 19.000s, expected 24.000s"):
+        check_part("dashboard", 24.0, 19.0)
+
+
+def test_part_within_one_frame_passes():
+    check_part("dashboard", 24.0, 24.0 + 1 / 30 - 1e-6)
+    check_part("dashboard", 24.0, 24.0 - 1 / 30 + 1e-6)

@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from lsvideo.model import Clip, Inset, Shot, Still, VideoError, Voice
-from lsvideo.timeline import place
+from lsvideo.timeline import check_sources, place
 
 P = Path("x")
 
@@ -60,3 +60,22 @@ def test_silent_shot_needs_no_voice():
 def test_narrated_shot_without_a_voice_is_rejected():
     with pytest.raises(VideoError, match="shot a: no voice synthesized"):
         place([still("a")], {}, 180)
+
+
+def test_clip_past_the_end_of_its_footage_names_the_shot():
+    footage = Path("/footage/phone_dashboard.mp4")
+    shot = Shot("dashboard", Clip(footage, 1.0, 25.0), "", 0.5, 0.0)
+    with pytest.raises(VideoError, match="shot dashboard: clip footage phone_dashboard.mp4 is 20.00s but out_s is 25.00s"):
+        check_sources([shot], {footage: 20.0})
+
+
+def test_pip_past_the_end_of_its_footage_names_the_shot():
+    main, pip = Path("/footage/overlay_lift.mp4"), Path("/footage/phone_lift.mp4")
+    shot = Shot("lift_alert", Inset(Clip(main, 36.0, 56.0), Clip(pip, 36.0, 56.0)), "", 0.5, 0.0)
+    with pytest.raises(VideoError, match="shot lift_alert: pip footage phone_lift.mp4 is 50.00s but out_s is 56.00s"):
+        check_sources([shot], {main: 75.0, pip: 50.0})
+
+
+def test_footage_not_probed_is_skipped():
+    shot = Shot("dashboard", Clip(Path("/footage/phone_dashboard.mp4"), 1.0, 25.0), "", 0.5, 0.0)
+    check_sources([still("a"), shot], {})

@@ -5,7 +5,7 @@ import subprocess
 from collections.abc import Sequence
 from pathlib import Path
 
-from .model import Clip, Inset, VideoError
+from .model import FPS, Clip, Inset, VideoError
 
 FFMPEG = ["ffmpeg", "-hide_banner", "-y"]
 # Every part is encoded identically so `concat -c copy` can join them.
@@ -113,3 +113,9 @@ def check_font(log: str, family: str = "IBM Plex Sans", expect_prefix: str = "IB
     for target in targets:
         if not target.startswith(expect_prefix):
             raise VideoError(f"libass fell back to {target} for {family}")
+
+
+def check_part(shot_id: str, expected: float, actual: float) -> None:
+    """A part that rendered short (or long) would shift every later shot's narration and captions."""
+    if abs(actual - expected) > 1 / FPS:
+        raise VideoError(f"shot {shot_id}: rendered part is {actual:.3f}s, expected {expected:.3f}s")
