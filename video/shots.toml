@@ -1,0 +1,98 @@
+# LineSafe Stage I demo video. Edit narration here; `make video` rebuilds.
+# Every number spoken must be a row in deck/claims.md. Footage lives in video/footage/ (gitignored).
+voice = "en-US-AndrewNeural"
+max_total_s = 180
+
+[[shot]]
+id = "problem"
+slide = 2
+narration = """
+In most plants, ergonomic risk is still assessed with a clipboard. A safety manager watches one station, scores each
+posture by eye on a paper REBA or RULA sheet, and types it into a monthly report. Two assessors give two scores, the
+risky posture happens when nobody is watching, and nothing is left to show what changed.
+"""
+
+[[shot]]
+id = "approach"
+slide = 5
+narration = """
+LineSafe turns the station PC into a continuous assessor. A camera feeds a pose model that finds 17 body keypoints.
+Plain geometry turns them into joint angles, and the published REBA and RULA tables turn the angles into a score. The
+same posture always gives the same score, and every score names the angle behind it.
+"""
+
+[[shot]]
+id = "lift_intro"
+clip = "video/footage/overlay_lift.mp4"
+in_s = 2.0
+out_s = 14.0
+pip = "video/footage/phone_lift.mp4"
+pip_in_s = 2.0
+pip_out_s = 14.0
+lead_s = 1.0
+narration = """
+This is the prototype, running live on a laptop. In Stage Two, the same pipeline moves onto the ASUS UGen300.
+"""
+
+[[shot]]
+id = "lift_climb"
+clip = "video/footage/overlay_lift.mp4"
+in_s = 14.0
+out_s = 36.0
+pip = "video/footage/phone_lift.mp4"
+pip_in_s = 14.0
+pip_out_s = 36.0
+narration = """
+Upright, the score is Low. As the trunk bends to reach the box, it climbs to Medium, then to High.
+"""
+
+[[shot]]
+id = "lift_alert"
+clip = "video/footage/overlay_lift.mp4"
+in_s = 36.0
+out_s = 56.0
+pip = "video/footage/phone_lift.mp4"
+pip_in_s = 36.0
+pip_out_s = 56.0
+narration = """
+Held in High for a few seconds, the posture raises an alert, and an event is stored with the angles that drove it.
+"""
+
+[[shot]]
+id = "offline"
+clip = "video/footage/overlay_offline.mp4"
+in_s = 2.0
+out_s = 20.0
+pip = "video/footage/phone_offline.mp4"
+pip_in_s = 2.0
+pip_out_s = 20.0
+narration = """
+Now the laptop goes offline. Scoring carries on, because nothing ever needs to leave the room.
+"""
+
+[[shot]]
+id = "dashboard"
+clip = "video/footage/phone_dashboard.mp4"
+in_s = 1.0
+out_s = 25.0
+narration = """
+Back on the plant network, the safety manager opens the dashboard on a phone. Each event shows the station, the time,
+the peak score and the angles behind it. No video is stored and no one is identified. The system rates the task, not
+the person.
+"""
+
+[[shot]]
+id = "stage_two"
+slide = 16
+narration = """
+As a finalist, we bring the pipeline up on the UGen300, measure throughput per stream, and check the scores against
+certified human assessors.
+"""
+
+[[shot]]
+id = "close"
+slide = 1
+hold_s = 2.0
+narration = """
+LineSafe. Continuous ergonomic risk scoring at the workstation, offline, on an ASUS UGen300.
+"""

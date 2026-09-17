@@ -3,8 +3,9 @@ DECK := deck
 DIST := $(DECK)/dist
 PDF := $(DIST)/proposal.pdf
 PY := uv run --no-project --with pymupdf python
+VIDEO_PY := uv run --no-project --python 3.12 --with 'edge-tts>=7.2' --with pymupdf --with fonttools --with brotli python
 
-.PHONY: pdf png check all clean video-test
+.PHONY: pdf png check all clean video-test video
 
 all: pdf check png
 
@@ -27,3 +28,6 @@ clean:
 
 video-test:
 	uv run --no-project --python 3.12 --with pytest python -m pytest video/tests -q
+
+video: $(PDF)
+	$(VIDEO_PY) video/build.py $(if $(DRAFT),--draft)
