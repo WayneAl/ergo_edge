@@ -5,9 +5,10 @@ the package never needs the ``web`` extra. Routes:
 
 * ``GET /api/status`` - latest status of every station (``EventStore.status``).
 * ``GET /api/events?limit=50&since=<float>`` - events newest first (``EventStore.events``).
-* ``GET /api/summary?days=7`` - counts over the events with ``t_start >= time.time() - days * 86400``.
+* ``GET /api/summary?days=7`` - counts over the events with ``t_start >= time.time() - days * 86400``,
+  ``days`` 1..366.
 * ``GET /`` - one self-contained HTML page (inline CSS and JS, no external URL) that polls
-  the routes above every 2 s.
+  status and events every 2 s and the summary every 30 s.
 
 Store times are wall-clock seconds.
 """
@@ -21,10 +22,14 @@ import time
 from collections import Counter
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from .reba import Band
 from .rula import rula_level
 from .store import EventStore
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 
 # The overlay's BAND_BGR as CSS RGB hex; tests/test_web.py keeps the two in step.
 BAND_RGB: dict[Band, str] = {
@@ -36,6 +41,7 @@ BAND_RGB: dict[Band, str] = {
 }
 TOP_DRIVERS = 5
 DAY_S = 86400
+MAX_SUMMARY_DAYS = 366
 _ALL_ROWS = 2**63 - 1  # SQLite's largest LIMIT: every matching row
 _MAGNITUDE = re.compile(r"\s+[+-]?\d+(?:\.\d+)?°?$")
 
@@ -53,7 +59,7 @@ def summarize(events: list[dict], days: int) -> dict:
 
     ``by_band`` always has ``high`` and ``very high`` and counts any other band an event has;
     ``top_drivers`` counts each driver kind (see :func:`driver_kind`) once per event, most
-    frequent first, ties by name; ``total_high_seconds`` sums ``duration_s``.
+    frequent first, ties by name; ``total_high_seconds`` sums ``duration_s``, rounded to 0.1 s.
     """
     by_band = {Band.HIGH.value: 0, Band.VERY_HIGH.value: 0}
     kinds: Counter[str] = Counter()
@@ -66,11 +72,11 @@ def summarize(events: list[dict], days: int) -> dict:
         "events": len(events),
         "by_band": by_band,
         "top_drivers": [[kind, n] for kind, n in top],
-        "total_high_seconds": sum(e["duration_s"] for e in events),
+        "total_high_seconds": round(float(sum(e["duration_s"] for e in events)), 1),
     }
 
 
-def create_app(db_path: Path):
+def create_app(db_path: Path) -> FastAPI:
     """The dashboard app over the store at ``db_path`` (opened now, closed on shutdown)."""
     from fastapi import FastAPI, HTTPException, Query
     from fastapi.responses import HTMLResponse
@@ -85,7 +91,8 @@ def create_app(db_path: Path):
         finally:
             store.close()
 
-    app = FastAPI(title="LineSafe", lifespan=lifespan)
+    # No /docs, /redoc or /openapi.json: the docs pages load a CDN and break on an offline LAN.
+    app = FastAPI(title="LineSafe", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
     @app.get("/api/status")
     def status() -> list[dict]:
@@ -98,7 +105,7 @@ def create_app(db_path: Path):
         return store.events(limit, since)
 
     @app.get("/api/summary")
-    def summary(days: int = Query(7, ge=1)) -> dict:
+    def summary(days: int = Query(7, ge=1, le=MAX_SUMMARY_DAYS)) -> dict:
         return summarize(store.events(_ALL_ROWS, time.time() - days * DAY_S), days)
 
     @app.get("/", response_class=HTMLResponse)
@@ -226,9 +233,11 @@ h3 { margin: 16px 0 6px; font-size: 15px; }
 <script>
 "use strict";
 const POLL_MS = 2000;
+const SUMMARY_POLL_MS = 30000;
 const STALE_S = 10;
 const TIMEOUT_MS = 5000;
-const EVENTS_LIMIT = 50;
+const EVENTS_LIMIT = 50; // shown; one more is requested to know whether there are more
+let lastSummaryMs = null; // Date.now() of the last rendered summary
 const RULA_LEVELS = __RULA_LEVELS__;
 let clockOffset = 0; // server clock minus this device's clock, in s; 0 unless they differ by more than 2 s
 
@@ -278,15 +287,26 @@ function startOfToday() {
 
 async function getJSON(path) {
   const options = { cache: "no-store" };
-  if (typeof AbortSignal !== "undefined" && AbortSignal.timeout) options.signal = AbortSignal.timeout(TIMEOUT_MS);
-  const res = await fetch(path, options);
-  if (!res.ok) throw new Error(path + " returned " + res.status);
-  const date = Date.parse(res.headers.get("date") || "");
-  if (!Number.isNaN(date)) {
-    const offset = (date - Date.now()) / 1000;
-    clockOffset = Math.abs(offset) > 2 ? offset : 0;
+  let timer = null;
+  if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+    options.signal = AbortSignal.timeout(TIMEOUT_MS);
+  } else if (typeof AbortController !== "undefined") {
+    const c = new AbortController();
+    timer = setTimeout(() => c.abort(), TIMEOUT_MS);
+    options.signal = c.signal;
   }
-  return res.json();
+  try {
+    const res = await fetch(path, options);
+    if (!res.ok) throw new Error(path + " returned " + res.status);
+    const date = Date.parse(res.headers.get("date") || "");
+    if (!Number.isNaN(date)) {
+      const offset = (date - Date.now()) / 1000;
+      clockOffset = Math.abs(offset) > 2 ? offset : 0;
+    }
+    return await res.json(); // inside try: the timeout also covers reading the body
+  } finally {
+    if (timer !== null) clearTimeout(timer);
+  }
 }
 
 function renderStations(rows) {
@@ -319,12 +339,12 @@ function renderStations(rows) {
 function renderEvents(rows) {
   const list = $("events");
   list.replaceChildren();
-  $("events-note").textContent = rows.length >= EVENTS_LIMIT ? "latest " + EVENTS_LIMIT + " shown" : "";
+  $("events-note").textContent = rows.length > EVENTS_LIMIT ? "latest " + EVENTS_LIMIT + " shown" : "";
   if (!rows.length) {
     list.append(el("li", "empty", "No High-risk events today."));
     return;
   }
-  for (const e of rows) {
+  for (const e of rows.slice(0, EVENTS_LIMIT)) {
     const li = el("li", "event " + bandClass(e.band));
     const when = clockTime(e.t_start);
     const band = el("span", "band");
@@ -365,14 +385,19 @@ function setConn(state, text) {
 
 async function poll() {
   try {
+    // status and events every poll; the summary every SUMMARY_POLL_MS, retried on the next poll if it failed
+    const summaryDue = lastSummaryMs === null || Date.now() - lastSummaryMs >= SUMMARY_POLL_MS;
     const [status, events, summary] = await Promise.all([
       getJSON("/api/status"),
-      getJSON("/api/events?limit=" + EVENTS_LIMIT + "&since=" + startOfToday()),
-      getJSON("/api/summary?days=7"),
+      getJSON("/api/events?limit=" + (EVENTS_LIMIT + 1) + "&since=" + startOfToday()),
+      summaryDue ? getJSON("/api/summary?days=7") : null,
     ]);
     renderStations(status);
     renderEvents(events);
-    renderSummary(summary);
+    if (summary !== null) {
+      renderSummary(summary);
+      lastSummaryMs = Date.now();
+    }
     setConn("live", "live");
   } catch (err) {
     setConn("down", "connection lost, retrying");
