@@ -1072,7 +1072,8 @@ class FrameResult:
     closed_event: Event | None
 class Pipeline:
     def __init__(self, backend: PoseBackend, cfg: StationConfig, params: PipelineParams = PipelineParams(),
-                 store: EventStore | None = None) -> None
+                 store: EventStore | None = None, wall_offset: float = 0.0) -> None
+    # t passed to step() is monotonic (strictly increasing); everything written to the store is t + wall_offset
     def step(self, t: float, frame_bgr: np.ndarray | None, idx: int, fps: float = 0.0) -> FrameResult
     def close(self) -> Event | None     # flushes the event detector (stores the event); does NOT close the backend
 
@@ -1086,7 +1087,9 @@ True; any SIDE resets), `angles = compute_angles(pose, params.geometry, view_ok=
 `classify_view(pose, params.geometry)` — both calls use the same params);
 `flags = activity.update(t, angles)`; `reba = score_reba(angles, cfg, flags.reba_points) if angles else None`;
 `rula = score_rula(angles, cfg, flags.rula_muscle_use) if angles else None`; `closed = events.update(t, reba)`;
-store (if any): `add_event(closed)` when closed; `set_status(...)` when `t - last_status_t >= status_every_s`.
+store (if any): `add_event(replace(closed, t_start=closed.t_start + wall_offset, t_end=closed.t_end + wall_offset))`
+when closed; `set_status(station, t + wall_offset, ...)` when `t - last_status_t >= status_every_s`. `close()` stores a
+flushed event the same way.
 
 `overlay.draw` must show: skeleton segments whose both ends have conf ≥ 0.3; angle labels (trunk at hip mid, upper
 arm at shoulder, elbow, knee) as integers with "°"; a top-left panel with station id, `REBA <total> <band>` on a
@@ -1097,8 +1100,9 @@ when `wrong_view`; `no person in view` when pose None; `FPS <x.x>` top-right, re
 
 CLI (`typer`, `app = typer.Typer(no_args_is_help=True)`):
 - `linesafe run --source TEXT (camera index or video path, default "0") --station PATH --backend ultralytics|hailo
-  --device TEXT? --db PATH (default linesafe.db) --record PATH?` — opens `cv2.VideoCapture`, `t = time.time()` per
-  frame, FPS = exponential moving average of 1/dt (α 0.1), `overlay.draw`, `cv2.imshow("LineSafe", …)`; key `s` saves
+  --device TEXT? --db PATH (default linesafe.db) --record PATH?` — opens `cv2.VideoCapture`, `t = time.monotonic()` per
+  frame (activity, events and tracker all reject time that goes backwards; wall-clock can jump on an NTP sync), the
+  Pipeline gets `wall_offset = time.time() - time.monotonic()` captured once at start, FPS = exponential moving average of 1/dt (α 0.1), `overlay.draw`, `cv2.imshow("LineSafe", …)`; key `s` saves
   `pilot/<station>_<YYYYmmdd-HHMMSS-fff>.png` (drawn frame) and `.json` (`t`, angles as degrees or reason strings,
   `reba` parts/total/band, `rula` parts/total/level); key `q` or ESC quits; `--record` writes the raw frames to mp4 at the
   capture's fps. On exit: `pipeline.close()`, `backend.close()`, release capture/writer, destroy windows. Exit 1 on
