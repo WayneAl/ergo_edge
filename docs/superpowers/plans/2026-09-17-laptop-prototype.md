@@ -84,7 +84,7 @@ is camera-free and torch-free.
 **Steps:**
 - [ ] 1. `pyproject.toml` modelled on golf's: `name = "linesafe"`, `version = "0.1.0"`,
   `description = "Continuous REBA/RULA ergonomic risk scoring from pose estimation"`, dependencies
-  `numpy>=2`, `opencv-python>=4.10`, `typer>=0.12`; `[project.optional-dependencies]` `pose = ["ultralytics>=8.3"]`,
+  `numpy>=2`, `opencv-python>=5.0` (the overlay's "°" needs OpenCV 5 text rendering; amended after Task 8), `typer>=0.12`; `[project.optional-dependencies]` `pose = ["ultralytics>=8.3"]`,
   `web = ["fastapi>=0.115", "uvicorn>=0.30"]`; `[dependency-groups] dev = ["pytest>=8", "httpx>=0.27"]`;
   `[project.scripts] linesafe = "linesafe.cli:app"`; hatchling with `packages = ["src/linesafe"]`;
   `[tool.pytest.ini_options] testpaths = ["tests"]`. `.python-version` = `3.11`.
@@ -1084,7 +1084,10 @@ def draw(frame_bgr: np.ndarray, result: FrameResult, cfg: StationConfig, fps: fl
 ```
 `Pipeline.step`: `dets = backend.infer(frame_bgr, idx)` → `pose = tracker.update(t, dets)`; pose None → view None,
 angles None, reba/rula None; else `view = classify_view(pose, params.geometry)`, wrong-view debounce (FRONT since ≥ `wrong_view_s` →
-True; any SIDE resets), `angles = compute_angles(pose, params.geometry, view_ok=not wrong_view)` (and
+True; any SIDE resets), `angles = compute_angles(pose, params.geometry, view_ok=(view is View.SIDE))` —
+every FRONT frame is unscored immediately (the twist proxy and flexion angles are meaningless from the front; amended after
+the Task 8 render review showed a front pose scored "trunk twist" during the debounce); `wrong_view` only decides when the
+banner appears (and
 `classify_view(pose, params.geometry)` — both calls use the same params);
 `flags = activity.update(t, angles)`; `reba = score_reba(angles, cfg, flags.reba_points) if angles else None`;
 `rula = score_rula(angles, cfg, flags.rula_muscle_use) if angles else None`; `closed = events.update(t, reba)`;
