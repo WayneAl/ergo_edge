@@ -39,9 +39,9 @@ class StationConfig:
     roi: tuple[int, int, int, int] | None = None  # x1, y1, x2, y2 pixels; None = whole frame
 
     def __post_init__(self) -> None:
-        if not isinstance(self.station_id, str) or not self.station_id:
+        if not isinstance(self.station_id, str) or not self.station_id.strip():
             raise ValueError(
-                f"StationConfig.station_id must be a non-empty str, got {self.station_id!r}"
+                f"StationConfig.station_id must be a non-blank str, got {self.station_id!r}"
             )
         _check_int("reba_load", self.reba_load, 0, 2)
         _check_bool("reba_shock", self.reba_shock)
@@ -73,6 +73,9 @@ def load_station(path: Path | str) -> StationConfig:
     """Read the ``[station]`` table of a TOML file; unknown keys raise ``ValueError``."""
     with open(path, "rb") as fh:
         data = tomllib.load(fh)
+    for key in data:
+        if key != "station":
+            raise ValueError(f"{path}: unknown top-level key {key!r} (keys belong in [station])")
     table = data.get("station")
     if not isinstance(table, dict):
         raise ValueError(f"{path}: missing [station] table")

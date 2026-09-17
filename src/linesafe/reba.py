@@ -56,29 +56,38 @@ def _finite(name: str, value: float) -> float:
     return float(value)
 
 
+def _flag(name: str, value: bool) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{name} must be a bool, got {value!r}")
+    return value
+
+
 def trunk_score(flex_deg: float, twisted: bool) -> int:
-    f = _finite("flex_deg", flex_deg)
+    f = _finite("trunk flex_deg", flex_deg)
+    twisted = _flag("trunk twisted", twisted)
     if abs(f) <= UPRIGHT_TOL_DEG:
         s = 1
-    elif 5 < f <= 20 or -20 <= f < -5:
+    elif UPRIGHT_TOL_DEG < f <= 20 or -20 <= f < -UPRIGHT_TOL_DEG:
         s = 2
     elif 20 < f <= 60 or f < -20:
         s = 3
-    else:  # f > 60
+    elif f > 60:
         s = 4
-    return s + int(bool(twisted))
+    else:
+        raise AssertionError(f"unreachable: trunk flex_deg {f} fell through the bands")
+    return s + int(twisted)
 
 
 def neck_score(flex_deg: float) -> int:
-    n = _finite("flex_deg", flex_deg)
+    n = _finite("neck flex_deg", flex_deg)
     return 1 if -5 <= n <= 20 else 2
 
 
 def legs_score(bilateral: bool, knee_flex_deg: float | None) -> int:
-    s = 1 if bilateral else 2
+    s = 1 if _flag("legs bilateral", bilateral) else 2
     if knee_flex_deg is None:
         return s
-    k = _finite("knee_flex_deg", knee_flex_deg)
+    k = _finite("knee flex_deg", knee_flex_deg)
     if 30 <= k <= 60:
         return s + 1
     if k > 60:
@@ -87,7 +96,7 @@ def legs_score(bilateral: bool, knee_flex_deg: float | None) -> int:
 
 
 def upper_arm_score(flex_deg: float, supported: bool) -> int:
-    u = _finite("flex_deg", flex_deg)
+    u = _finite("upper_arm flex_deg", flex_deg)
     if -20 <= u <= 20:
         s = 1
     elif 20 < u <= 45 or u < -20:
@@ -100,7 +109,7 @@ def upper_arm_score(flex_deg: float, supported: bool) -> int:
 
 
 def lower_arm_score(flex_deg: float) -> int:
-    lo = _finite("flex_deg", flex_deg)
+    lo = _finite("lower_arm flex_deg", flex_deg)
     return 1 if 60 <= lo <= 100 else 2
 
 
@@ -167,7 +176,7 @@ def score_reba(angles: Angles, cfg: StationConfig, activity: int = 0) -> RebaSco
         partial = True
     else:
         bilateral = angles.legs_bilateral
-    knees = [a.deg for a in angles.knee if isinstance(a, Measured)]
+    knees = [_finite("knee flex_deg", a.deg) for a in angles.knee if isinstance(a, Measured)]
     k = max(knees) if knees else None
     if k is None:
         missing.append("knee")
@@ -183,6 +192,8 @@ def score_reba(angles: Angles, cfg: StationConfig, activity: int = 0) -> RebaSco
     for side in (LEFT, RIGHT):
         ua = angles.upper_arm[side]
         if not isinstance(ua, Measured):
+            if isinstance(angles.upper_arm[1 - side], Measured):
+                missing.append(f"upper arm {_SIDE_NAMES[side]}")
             continue
         upper = upper_arm_score(ua.deg, cfg.arm_supported)
         la = angles.lower_arm[side]
@@ -213,12 +224,12 @@ def score_reba(angles: Angles, cfg: StationConfig, activity: int = 0) -> RebaSco
     assert 1 <= total <= 15, total
 
     drivers: list[str] = []
-    if trunk >= 3:
+    if trunk_score(f, False) >= 3:
         drivers.append(f"trunk flexion {f:.0f}°" if f >= 0 else f"trunk extension {-f:.0f}°")
     if twisted:
         drivers.append("trunk twist")
     if neck == 2:
-        drivers.append(f"neck flexion {n:.0f}°")
+        drivers.append(f"neck flexion {n:.0f}°" if n > 20 else f"neck extension {-n:.0f}°")
     if upper >= 3:
         drivers.append(f"upper arm {side_name} {u:.0f}°")
     if legs >= 2:

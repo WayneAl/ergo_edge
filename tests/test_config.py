@@ -29,3 +29,26 @@ def test_unknown_key(tmp_path):
 
 def test_example_file_parses():
     assert load_station("stations/example.toml").station_id == "S1"
+
+# --- Fix round 1: review minors M1, M6, M7 ---
+
+def test_top_level_key_outside_station(tmp_path):
+    p = tmp_path / "s.toml"
+    p.write_text('reba_load = 2\n[station]\nid = "S7"\n')
+    with pytest.raises(ValueError, match="reba_load"):
+        load_station(p)
+
+def test_blank_station_id():
+    with pytest.raises(ValueError, match="station_id"):
+        StationConfig(station_id="   ")
+
+@pytest.mark.parametrize("field,value", [("reba_shock", 1), ("arm_supported", "yes"), ("reba_load", True)])
+def test_type_checks_name_the_field(field, value):
+    with pytest.raises(ValueError, match=field):
+        StationConfig(station_id="S1", **{field: value})
+
+def test_literal_station_id_key_rejected(tmp_path):
+    p = tmp_path / "s.toml"
+    p.write_text('[station]\nid = "S7"\nstation_id = "S8"\n')
+    with pytest.raises(ValueError, match="station_id"):
+        load_station(p)
