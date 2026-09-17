@@ -242,7 +242,9 @@ def compute_angles(pose: PoseFrame, params: GeometryParams = GeometryParams(), v
 - `neck_flex = degrees(atan2(dot(h, f), dot(h, u))) - neck_offset_deg`, `h = ear_mean - shoulder_mid`
   (confident ears only; none → `Missing("no confident ear")`).
 - `upper_arm[side] = degrees(atan2(dot(v, f), dot(v, -u)))`, `v = elbow - shoulder` of that side
-  (shoulder or elbow not confident → `Missing("l_elbow not confident")` using `NAMES`).
+  (shoulder or elbow not confident → `Missing("l_elbow not confident")` using `NAMES`); then if the result is
+  `<= -90` add 360, so the range is (-90, 270] — an overhead reach past 180° stays a large flexion instead of
+  wrapping to a negative extension (amended after Task 3 review; shoulder extension never reaches -90°).
 - `lower_arm[side] = 180 - interior angle at elbow between (shoulder - elbow) and (wrist - elbow)`.
 - `knee[side] = 180 - interior angle at knee between (hip - knee) and (ankle - knee)`.
 - `legs_bilateral`: both ankles confident → `|ankle_l.y - ankle_r.y| <= legs_level_frac * L`; else `Missing("ankle not confident")`.
@@ -252,7 +254,9 @@ def compute_angles(pose: PoseFrame, params: GeometryParams = GeometryParams(), v
   else SIDE; otherwise SIDE.
 - `view_ok=False` → `trunk_flex`, `neck_flex`, `upper_arm`, `lower_arm`, `knee` are all
   `Missing("front view on a side-view station")`; `trunk_twisted` and `legs_bilateral` computed as usual.
-- Interior angle uses `acos(clip(dot / (|a||b|), -1, 1))`; a zero-length vector → `Missing("degenerate <segment>")`.
+- Interior angle uses `acos(clip(dot / (|a||b|), -1, 1))`; a segment shorter than 1 px (same threshold as the
+  torso) → `Missing("degenerate <segment>")`. `PoseFrame` rejects non-finite kpts/conf with `ValueError`;
+  `GeometryParams.conf_min` must satisfy `0 < conf_min <= 1`.
 
 **Named failure modes owned here (spec):** wrong camera view → flexion angles Missing (test 11); a missing
 keypoint is `Missing` with a reason, never 0 (test 10).
@@ -1077,7 +1081,8 @@ def draw(frame_bgr: np.ndarray, result: FrameResult, cfg: StationConfig, fps: fl
 ```
 `Pipeline.step`: `dets = backend.infer(frame_bgr, idx)` → `pose = tracker.update(t, dets)`; pose None → view None,
 angles None, reba/rula None; else `view = classify_view(pose)`, wrong-view debounce (FRONT since ≥ `wrong_view_s` →
-True; any SIDE resets), `angles = compute_angles(pose, params.geometry, view_ok=not wrong_view)`;
+True; any SIDE resets), `angles = compute_angles(pose, params.geometry, view_ok=not wrong_view)` (and
+`classify_view(pose, params.geometry)` — both calls use the same params);
 `flags = activity.update(t, angles)`; `reba = score_reba(angles, cfg, flags.reba_points) if angles else None`;
 `rula = score_rula(angles, cfg, flags.rula_muscle_use) if angles else None`; `closed = events.update(t, reba)`;
 store (if any): `add_event(closed)` when closed; `set_status(...)` when `t - last_status_t >= status_every_s`.
