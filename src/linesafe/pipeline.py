@@ -1,11 +1,15 @@
-"""One frame through the whole chain: backend -> tracker -> view and angles -> REBA/RULA
--> activity -> events -> store.
+"""One frame through the whole chain: backend -> tracker -> view and angles -> activity
+-> REBA/RULA -> events -> store.
 
 The same :class:`Pipeline` runs live (``linesafe run``) and from a keypoints file
 (``linesafe replay``). Time passed to :meth:`Pipeline.step` is the pipeline clock in
 seconds and must strictly increase (live: ``time.monotonic()``; replay: ``idx / fps``).
 Everything written to the store is shifted by ``wall_offset`` so a live session lands on
 wall-clock time while the pipeline itself never sees a clock jump.
+
+Only SIDE frames are scored: a FRONT frame gets angles with every flexion ``Missing`` at
+once. ``wrong_view`` (FRONT for ``wrong_view_s``) only decides when the banner appears; a
+frame without a pose neither advances nor resets that debounce, a SIDE frame resets it.
 """
 
 from __future__ import annotations
@@ -92,7 +96,9 @@ class Pipeline:
             self.store.add_event(replace(e, t_start=e.t_start + off, t_end=e.t_end + off))
 
     def step(self, t: float, frame_bgr: np.ndarray | None, idx: int, fps: float = 0.0) -> FrameResult:
-        """Process frame ``idx`` taken at pipeline time ``t`` (seconds)."""
+        """Process frame ``idx`` taken at pipeline time ``t`` (seconds); ``fps`` goes to the store status."""
+        if isinstance(fps, bool) or not isinstance(fps, (int, float)) or not math.isfinite(fps) or fps < 0:
+            raise ValueError(f"Pipeline.step fps must be finite and >= 0, got {fps!r}")
         p = self.params
         dets = self.backend.infer(frame_bgr, idx)
         pose = self._tracker.update(t, dets)
@@ -100,9 +106,7 @@ class Pipeline:
         view: View | None = None
         wrong_view = False
         angles: Angles | None = None
-        if pose is None:
-            self._front_since = None  # no person breaks a FRONT run
-        else:
+        if pose is not None:  # no pose: the FRONT debounce is left as it is
             view = classify_view(pose, p.geometry)
             if view is View.FRONT:
                 if self._front_since is None:
@@ -110,7 +114,7 @@ class Pipeline:
                 wrong_view = t - self._front_since >= p.wrong_view_s
             else:
                 self._front_since = None
-            angles = compute_angles(pose, p.geometry, view_ok=not wrong_view)
+            angles = compute_angles(pose, p.geometry, view_ok=view is View.SIDE)
 
         flags = self._activity.update(t, angles)
         reba = score_reba(angles, self.cfg, flags.reba_points) if angles is not None else None

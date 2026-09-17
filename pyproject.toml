@@ -5,7 +5,7 @@ description = "Continuous REBA/RULA ergonomic risk scoring from pose estimation"
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "numpy>=2",
-    "opencv-python>=4.10",
+    "opencv-python>=5.0",
     "typer>=0.12",
 ]
 

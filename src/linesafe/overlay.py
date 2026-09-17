@@ -55,10 +55,12 @@ def _pt(xy) -> tuple[int, int]:
     )
 
 
-def _text(img, text, org, scale, color, thick, outline=True) -> tuple[int, int]:
-    """Draw ``text`` with its baseline-left at ``org``; returns its (width, height)."""
-    if outline:
-        cv2.putText(img, text, _pt(org), _FONT, scale, _BLACK, thick + 2, cv2.LINE_AA)
+def _text(img, text, org, scale, color, thick) -> tuple[int, int]:
+    """Draw ``text`` with its baseline-left at ``org``; returns its (width, height).
+
+    No black outline pass: OpenCV 5 fonts get wider with thickness, so a thicker outline
+    would not line up with the text. Legibility comes from the shaded boxes behind text.
+    """
     cv2.putText(img, text, _pt(org), _FONT, scale, color, thick, cv2.LINE_AA)
     (tw, th), _ = cv2.getTextSize(text, _FONT, scale, thick)
     return tw, th
@@ -85,6 +87,25 @@ def _shade(img, x1, y1, x2, y2, keep=0.4) -> None:
 def _fit(text, scale, thick, max_w) -> float:
     (tw, _), _ = cv2.getTextSize(text, _FONT, scale, thick)
     return scale * max_w / tw if tw > max_w > 0 else scale
+
+
+def _ellipsize(text: str, scale: float, thick: int, max_w: int) -> str:
+    """``text`` cut to fit ``max_w`` pixels, ending in an ellipsis when cut."""
+    if cv2.getTextSize(text, _FONT, scale, thick)[0][0] <= max_w:
+        return text
+    lo, hi = 0, len(text)  # the longest prefix that fits with the ellipsis is text[:lo]
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        if cv2.getTextSize(text[:mid].rstrip() + "…", _FONT, scale, thick)[0][0] <= max_w:
+            lo = mid
+        else:
+            hi = mid - 1
+    return text[:lo].rstrip() + "…" if lo > 0 else ""
+
+
+def _margin(s: float) -> int:
+    """Edge margin: 24 px at 1280x720, never under the event border on small frames."""
+    return max(round(24 * s), BORDER_PX + 2)
 
 
 def _pick(pair: tuple[Angle, Angle], preferred: int | None) -> int | None:
@@ -134,7 +155,8 @@ def _angle_labels(img, result: FrameResult, s: float) -> None:
 
 def _panel(img, result: FrameResult, cfg: StationConfig, s: float) -> None:
     reba, rula = result.reba, result.rula
-    x0, y0, pad = round(24 * s), round(24 * s), round(10 * s)
+    x0 = y0 = _margin(s)
+    pad = round(10 * s)
     scale, thick = 0.75 * s, max(1, round(2 * s))
     small = 0.6 * s
     line_h = round(36 * s)
@@ -154,6 +176,8 @@ def _panel(img, result: FrameResult, cfg: StationConfig, s: float) -> None:
             lines.append((f"PARTIAL: {', '.join(reba.missing)}", small, _YELLOW, None))
     elif result.angles is not None and not isinstance(result.angles.trunk_flex, Measured):
         lines.append((f"no score: {result.angles.trunk_flex.reason}", small, _YELLOW, None))
+    max_tw = img.shape[1] - 2 * x0 - 2 * pad  # the panel keeps the same margin on the right
+    lines = [(_ellipsize(t, sc, thick, max_tw), sc, c, chip) for t, sc, c, chip in lines]
 
     width = max(cv2.getTextSize(t, _FONT, sc, thick)[0][0] for t, sc, _, _ in lines) + 2 * pad
     height = line_h * len(lines) + pad
@@ -167,7 +191,7 @@ def _panel(img, result: FrameResult, cfg: StationConfig, s: float) -> None:
             cv2.rectangle(img, (x0, y + round(2 * s)), (x0 + tw + 2 * pad, y + line_h - round(2 * s)), chip, -1)
             if colour is None:
                 colour = _DARK if chip == BAND_BGR[Band.MEDIUM] else _WHITE
-            _text(img, text, (x0 + pad, base), sc, colour, thick, outline=False)
+            _text(img, text, (x0 + pad, base), sc, colour, thick)
         else:
             _text(img, text, (x0, base), sc, colour, thick)
         y += line_h
@@ -175,7 +199,7 @@ def _panel(img, result: FrameResult, cfg: StationConfig, s: float) -> None:
 
 def _ruler(img, result: FrameResult, s: float) -> None:
     h, w = img.shape[:2]
-    margin = round(24 * s)
+    margin = _margin(s)
     cell_h = round(34 * s)
     y1, y2 = h - margin - cell_h, h - margin
     cell_w = (w - 2 * margin) / 15.0
@@ -188,7 +212,7 @@ def _ruler(img, result: FrameResult, s: float) -> None:
         text = str(total)
         (tw, th), _ = cv2.getTextSize(text, _FONT, scale, thick)
         colour = _DARK if band is Band.MEDIUM else _WHITE
-        _text(img, text, ((x1 + x2 - tw) / 2, (y1 + y2 + th) / 2), scale, colour, thick, outline=False)
+        _text(img, text, ((x1 + x2 - tw) / 2, (y1 + y2 + th) / 2), scale, colour, thick)
     if result.reba is not None:
         t = result.reba.total
         x1, x2 = round(margin + (t - 1) * cell_w), round(margin + t * cell_w)
@@ -207,7 +231,7 @@ def _centre_box(img, text, colour, fill, s: float, y_mid: int) -> None:
         _shade(img, (w - tw) // 2 - round(16 * s), y_mid - half, (w + tw) // 2 + round(16 * s), y_mid + half)
     else:
         cv2.rectangle(img, (0, y_mid - half), (w - 1, y_mid + half), fill, -1)
-    _text(img, text, ((w - tw) / 2, y_mid + th / 2), scale, colour, thick, outline=fill is None)
+    _text(img, text, ((w - tw) / 2, y_mid + th / 2), scale, colour, thick)
 
 
 def _fps(img, fps: float, s: float) -> None:
@@ -215,7 +239,7 @@ def _fps(img, fps: float, s: float) -> None:
     text = f"FPS {fps:.1f}"
     scale, thick = 0.75 * s, max(1, round(2 * s))
     (tw, th), _ = cv2.getTextSize(text, _FONT, scale, thick)
-    margin, pad = round(24 * s), round(8 * s)
+    margin, pad = _margin(s), round(8 * s)
     x = w - margin - tw
     _shade(img, x - pad, margin - pad, w - margin + pad, margin + th + 2 * pad)
     colour = _RED if 0 < fps < FPS_WARN else _WHITE
@@ -232,7 +256,7 @@ def draw(frame_bgr: np.ndarray, result: FrameResult, cfg: StationConfig, fps: fl
         raise ValueError(f"fps must be a finite number, got {fps!r}")
     img = frame_bgr
     h, w = img.shape[:2]
-    s = h / 720.0
+    s = min(h / 720.0, w / 1280.0)
 
     if result.pose is not None:
         _skeleton(img, result, s)

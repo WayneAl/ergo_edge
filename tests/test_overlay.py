@@ -69,3 +69,25 @@ def test_fps_below_15_is_red():
     assert has_colour(draw(blank(), result(), CFG, 10.0)[top_right], RED)
     assert not has_colour(draw(blank(), result(), CFG, 15.0)[top_right], RED)
     assert not has_colour(draw(blank(), result(), CFG, 0.0)[top_right], RED)
+
+
+def test_no_person_text_is_drawn_in_the_centre():
+    centre = (slice(330, 390), slice(440, 840))
+    nobody = draw(blank(), result(), CFG, 30.0)
+    pose = PoseFrame(1.0, *side_pose(0, x0=150.0, y_hip=450.0, torso=120.0), bbox=(0.0, 0.0, 1280.0, 720.0))
+    someone = draw(blank(), result(pose, View.SIDE), CFG, 30.0)
+    assert not someone[centre].any()   # the person is drawn away from the centre
+    assert (nobody[centre] != someone[centre]).any()
+
+
+def test_panel_fits_narrow_and_small_frames():
+    long_driver = "upper arm left 95° with a driver text far longer than any frame is wide " * 3
+    for h, w in ((1280, 720), (240, 320)):
+        pose = PoseFrame(1.0, *side_pose(64, 95, 90, 40, x0=0.4 * w, y_hip=h / 2, torso=h / 8), bbox=(0.0, 0.0, w, h))
+        angles = compute_angles(pose)
+        reba = replace(score_reba(angles, CFG), drivers=(long_driver, long_driver), partial=True,
+                       missing=tuple(f"segment {i}" for i in range(40)))
+        frame = np.full((h, w, 3), 128, np.uint8)
+        out = draw(frame, result(pose, View.SIDE, False, angles, reba, score_rula(angles, CFG)), CFG, 30.0)
+        assert out.shape == (h, w, 3)
+        assert (out[: h - h // 8, -2:] == 128).all(), (h, w)   # nothing from the panel runs off the right edge

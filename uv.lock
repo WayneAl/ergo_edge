@@ -569,7 +569,7 @@ dev = [
 requires-dist = [
     { name = "fastapi", marker = "extra == 'web'", specifier = ">=0.115" },
     { name = "numpy", specifier = ">=2" },
-    { name = "opencv-python", specifier = ">=4.10" },
+    { name = "opencv-python", specifier = ">=5.0" },
     { name = "typer", specifier = ">=0.12" },
     { name = "ultralytics", marker = "extra == 'pose'", specifier = ">=8.3" },
     { name = "uvicorn", marker = "extra == 'web'", specifier = ">=0.30" },

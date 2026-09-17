@@ -1,4 +1,5 @@
 import pytest
+from linesafe import keypoints as K
 from linesafe.backends.replay import ReplayBackend
 from linesafe.config import StationConfig
 from linesafe.detections import RawDetections, save_keypoints
@@ -72,6 +73,38 @@ def test_front_view_sets_wrong_view_after_two_seconds(tmp_path):
     assert at(2.1).view is View.FRONT and at(2.1).wrong_view is True
     assert isinstance(at(2.1).angles.trunk_flex, Missing)
     assert all(r.reba is None and r.rula is None for r in results)
+
+
+def test_front_view_is_unscored_before_the_banner(tmp_path):
+    raw = session([(3, {"front": True})])
+    for dets in raw.frames:
+        dets[0].kpts[K.NOSE, 0] += 6.0   # nose off the ear midpoint: facing resolves even from the front
+    backend = replay(tmp_path, raw)
+    results, _ = run_all(Pipeline(backend, StationConfig(station_id="S1")), backend)
+    r = results[round(0.5 * FPS)]
+    assert r.view is View.FRONT and r.angles.facing == 1 and r.wrong_view is False
+    assert r.reba is None and r.rula is None and isinstance(r.angles.trunk_flex, Missing)
+    assert all(x.reba is None and x.rula is None for x in results)
+
+
+def test_dropped_detection_does_not_reset_wrong_view(tmp_path):
+    raw = session([(3, {"front": True})])
+    for i in range(45, raw.n, 45):   # one dropped detection every 1.5 s
+        raw.frames[i] = []
+    backend = replay(tmp_path, raw)
+    results, _ = run_all(Pipeline(backend, StationConfig(station_id="S1")), backend)
+    assert results[45].pose is None and results[45].wrong_view is False
+    assert results[round(1.9 * FPS)].wrong_view is False
+    assert results[round(2.1 * FPS)].wrong_view is True
+
+
+def test_step_rejects_bad_fps_before_any_state_change(tmp_path):
+    backend = replay(tmp_path, session([(1, UPRIGHT)]))
+    pipe = Pipeline(backend, StationConfig(station_id="S1"))
+    for bad in (float("nan"), float("inf"), -1.0):
+        with pytest.raises(ValueError, match="fps"):
+            pipe.step(0.0, None, 0, fps=bad)
+    assert pipe.step(0.0, None, 0, fps=30.0).reba is not None   # t = 0.0 is still accepted
 
 
 def test_no_person_gives_no_score(tmp_path):

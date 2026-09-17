@@ -1,9 +1,10 @@
 """LineSafe command line.
 
-``run`` scores a live camera and shows the overlay window, ``replay`` runs the same
-pipeline from a keypoints file (no camera, no torch), ``extract`` turns a video into a
-keypoints file, ``web`` serves the LAN dashboard over the event store. Heavy imports happen
-inside the commands; OpenCV windows are opened only by ``run``.
+``record`` captures raw camera frames on their measured timeline, ``run`` scores a live
+camera (or a video file) and shows the overlay window, ``replay`` runs the same pipeline from
+a keypoints file (no camera, no torch), ``extract`` turns a video into a keypoints file,
+``web`` serves the LAN dashboard over the event store. Heavy imports happen inside the
+commands; OpenCV windows are opened only by ``run``.
 
 Exit codes: 1 on backend or input-file errors, 2 on a bad station file or bad options.
 """
@@ -11,11 +12,19 @@ Exit codes: 1 on backend or input-file errors, 2 on a bad station file or bad op
 from __future__ import annotations
 
 import json
+import math
+import re
 import time
+from collections.abc import Iterable
+from contextlib import ExitStack
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import typer
+
+if TYPE_CHECKING:
+    import numpy as np
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -23,6 +32,7 @@ LIVE_BACKENDS = ("ultralytics", "hailo")
 FPS_EMA_ALPHA = 0.1
 WINDOW = "LineSafe"
 PILOT_DIR = Path("pilot")
+TIMESTAMPS_SUFFIX = ".timestamps.json"
 
 
 def _fail(message: str, code: int) -> typer.Exit:
@@ -98,14 +108,17 @@ def _event_json(e) -> dict:
     }
 
 
-def _save_pilot(cv2, frame, result, cfg, wall_offset: float) -> None:
-    """Key ``s``: the drawn frame as PNG plus its angles and scores as JSON."""
+def _save_pilot(raw, drawn, result, cfg, wall_offset: float, out_dir: Path = PILOT_DIR) -> Path | None:
+    """Key ``s``: the raw frame (the pilot rater measures on it), the drawn frame, angles and scores.
+
+    Writes ``<stem>_raw.png``, ``<stem>.png`` and ``<stem>.json`` and returns ``out_dir / stem``.
+    A failed save is reported on stderr and returns ``None``, so a live session keeps going.
+    """
+    import cv2
+
     now = datetime.now()
-    stem = f"{cfg.station_id}_{now:%Y%m%d-%H%M%S}-{now.microsecond // 1000:03d}"
-    PILOT_DIR.mkdir(parents=True, exist_ok=True)
-    png = PILOT_DIR / f"{stem}.png"
-    if not cv2.imwrite(str(png), frame):
-        raise OSError(f"could not write {png}")
+    station = re.sub(r"[^A-Za-z0-9_-]", "_", cfg.station_id)
+    stem = out_dir / f"{station}_{now:%Y%m%d-%H%M%S}-{now.microsecond // 1000:03d}"
     reba, rula = result.reba, result.rula
     payload = {
         "t": result.t + wall_offset,
@@ -129,22 +142,144 @@ def _save_pilot(cv2, frame, result, cfg, wall_offset: float) -> None:
             "missing": list(rula.missing),
         },
     }
-    (PILOT_DIR / f"{stem}.json").write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    typer.echo(f"saved {png}")
+    try:
+        out_dir.mkdir(parents=True, exist_ok=True)
+        for suffix, image in (("_raw.png", raw), (".png", drawn)):
+            path = stem.with_name(stem.name + suffix)
+            if not cv2.imwrite(str(path), image):
+                raise OSError(f"could not write {path}")
+        stem.with_name(stem.name + ".json").write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+    except (OSError, cv2.error) as exc:
+        typer.echo(f"pilot save failed: {exc}", err=True)
+        return None
+    typer.echo(f"saved {stem}_raw.png, {stem.name}.png, {stem.name}.json")
+    return stem
 
 
-def _open_writer(cv2, path: Path, cap, frame):
-    fps = float(cap.get(cv2.CAP_PROP_FPS))
-    if not fps > 0:
-        raise _fail(f"capture reports fps {fps}; cannot record {path} without it", 1)
-    h, w = frame.shape[:2]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
-    if not writer.isOpened():
-        raise _fail(f"cannot open {path} for writing", 1)
-    return writer
+def write_timed_video(frames: Iterable[tuple[float, np.ndarray]], out: Path) -> tuple[int, float]:
+    """Write ``(t, frame)`` pairs as an mp4 at the measured rate, plus a timestamps sidecar.
+
+    The rate is unknown until the last frame, so frames first go to a Motion-JPEG
+    ``<out>.part.avi`` (bounded disk, not memory), which is then re-encoded to ``out`` (mp4v)
+    at ``(n - 1) / (t_last - t_first)`` fps. ``<out>.timestamps.json`` lists every frame's
+    time in seconds from the first frame. Returns ``(n, fps)``.
+
+    Raises ``ValueError`` on no frames, a single frame, non-finite or non-increasing times,
+    or a frame that is not uint8 BGR or changes shape. Nothing half-written is left behind.
+    """
+    import cv2
+    import numpy as np
+
+    out = Path(out)
+    part = out.with_name(out.name + ".part.avi")
+    sidecar = out.with_name(out.name + TIMESTAMPS_SUFFIX)
+    times: list[float] = []
+    shape: tuple[int, ...] | None = None
+    started_out = False
+    try:
+        writer = None
+        try:
+            for t, frame in frames:
+                t = float(t)
+                if not math.isfinite(t):
+                    raise ValueError(f"frame time must be finite, got {t}")
+                if times and t <= times[-1]:
+                    raise ValueError(f"frame times must strictly increase: {times[-1]} -> {t}")
+                if not (isinstance(frame, np.ndarray) and frame.dtype == np.uint8 and frame.ndim == 3
+                        and frame.shape[2] == 3):
+                    raise ValueError("frame must be a uint8 array of shape (height, width, 3)")
+                if shape is None:
+                    shape = frame.shape
+                    out.parent.mkdir(parents=True, exist_ok=True)
+                    writer = cv2.VideoWriter(str(part), cv2.VideoWriter_fourcc(*"MJPG"), 30.0, (shape[1], shape[0]))
+                    if not writer.isOpened():
+                        raise OSError(f"cannot open {part} for writing")
+                elif frame.shape != shape:
+                    raise ValueError(f"frame shape changed from {shape} to {frame.shape}")
+                writer.write(frame)
+                times.append(t)
+        finally:
+            if writer is not None:
+                writer.release()
+        if not times:
+            raise ValueError("no frames to write")
+        if len(times) < 2:
+            raise ValueError(f"need at least 2 frames to measure the rate, got {len(times)}")
+        fps = (len(times) - 1) / (times[-1] - times[0])
+
+        started_out = True
+        cap = cv2.VideoCapture(str(part))
+        writer = cv2.VideoWriter(str(out), cv2.VideoWriter_fourcc(*"mp4v"), fps, (shape[1], shape[0]))
+        copied = 0
+        try:
+            if not cap.isOpened():
+                raise OSError(f"cannot read back {part}")
+            if not writer.isOpened():
+                raise OSError(f"cannot open {out} for writing")
+            while True:
+                ok, frame = cap.read()
+                if not ok:
+                    break
+                writer.write(frame)
+                copied += 1
+        finally:
+            cap.release()
+            writer.release()
+        if copied != len(times):
+            raise OSError(f"re-encoded {copied} of {len(times)} frames into {out}")
+        sidecar.write_text(json.dumps([round(t - times[0], 6) for t in times]) + "\n", encoding="utf-8")
+    except BaseException:
+        if started_out:
+            out.unlink(missing_ok=True)
+            sidecar.unlink(missing_ok=True)
+        raise
+    finally:
+        part.unlink(missing_ok=True)
+    return len(times), fps
+
+
+@app.command()
+def record(
+    source: str = typer.Option("0", help="Camera index."),
+    out: Path = typer.Option(..., help="mp4 to write; frame times go to <out>.timestamps.json."),
+    seconds: float = typer.Option(..., help="How long to record."),
+) -> None:
+    """Record raw camera frames (no pose inference) on their measured timeline."""
+    if not source.isdigit():
+        raise _fail(f"--source must be a camera index, got {source!r}", 2)
+    if not (math.isfinite(seconds) and seconds > 0):
+        raise _fail(f"--seconds must be > 0, got {seconds}", 2)
+    import cv2
+
+    with ExitStack() as stack:
+        cap = cv2.VideoCapture(int(source))
+        stack.callback(cap.release)
+        if not cap.isOpened():
+            raise _fail(f"cannot open camera {source}", 1)
+
+        def frames():
+            t_stop = last = None
+            while True:
+                ok, frame = cap.read()
+                if not ok:
+                    return
+                t = time.monotonic()
+                if last is not None and t <= last:
+                    t = last + 1e-6  # times must strictly increase
+                if t_stop is None:
+                    t_stop = t + seconds
+                elif t > t_stop:
+                    return
+                last = t
+                yield t, frame
+
+        try:
+            n, fps = write_timed_video(frames(), out)
+        except (OSError, ValueError) as exc:
+            raise _fail(f"record from camera {source} failed: {exc}", 1) from exc
+    typer.echo(f"frames={n} fps={fps:.3f} -> {out} (+ {out.name}{TIMESTAMPS_SUFFIX})")
 
 
 @app.command()
@@ -154,9 +289,8 @@ def run(
     backend: str = typer.Option("ultralytics", help="ultralytics | hailo"),
     device: str | None = typer.Option(None, help="Torch device for ultralytics: mps | cuda | cpu."),
     db: Path = typer.Option(Path("linesafe.db"), help="SQLite event store."),
-    record: Path | None = typer.Option(None, help="Also write the raw frames to this mp4."),
 ) -> None:
-    """Score a camera live with the overlay window. Keys: s saves a pilot frame, q or ESC quits."""
+    """Score a camera (or a video file) with the overlay window. Keys: s saves a pilot frame, q or ESC quits."""
     import cv2
 
     from . import overlay
@@ -164,53 +298,58 @@ def run(
     from .store import EventStore
 
     cfg = _load_station(station)
-    pose_backend = _make_live_backend(backend, device)
-    cap = cv2.VideoCapture(int(source) if source.isdigit() else source)
-    store = writer = pipeline = None
-    try:
+    camera = source.isdigit()
+    with ExitStack() as stack:  # every cleanup runs even if an earlier one raises
+        pose_backend = _make_live_backend(backend, device)
+        stack.callback(pose_backend.close)
+        cap = cv2.VideoCapture(int(source) if camera else source)
+        stack.callback(cap.release)
+        stack.callback(cv2.destroyAllWindows)
         if not cap.isOpened():
             raise _fail(f"cannot open source {source!r}", 1)
+        file_fps = 0.0
+        if not camera:
+            file_fps = float(cap.get(cv2.CAP_PROP_FPS))
+            if not file_fps > 0:
+                raise _fail(f"{source} reports fps {file_fps}; cannot time it", 1)
         store = EventStore(db)
-        # Pipeline time is monotonic (it must never go backwards); the store gets wall-clock time.
-        wall_offset = time.time() - time.monotonic()
+        stack.callback(store.close)
+        # Pipeline time must never go backwards: monotonic for a camera, frame index / fps for a
+        # file. The store gets wall-clock time (a file's time 0 is when this run started).
+        wall_offset = time.time() - time.monotonic() if camera else time.time()
         pipeline = Pipeline(pose_backend, cfg, store=store, wall_offset=wall_offset)
+        stack.callback(pipeline.close)
         fps = 0.0
         last_t: float | None = None
+        last_now: float | None = None
         idx = 0
         while True:
             ok, frame = cap.read()
             if not ok:
                 break
-            t = time.monotonic()
-            if last_t is not None:
-                if t <= last_t:
-                    t = last_t + 1e-6  # the pipeline needs strictly increasing time
-                inst = 1.0 / (t - last_t)
+            now = time.monotonic()
+            nudged = False
+            if camera:
+                t = now
+                if last_t is not None and t <= last_t:
+                    t, nudged = last_t + 1e-6, True  # the pipeline needs strictly increasing time
+            else:
+                t = idx / file_fps
+            if last_now is not None and not nudged and now > last_now:
+                inst = 1.0 / (now - last_now)
                 fps = inst if fps == 0.0 else (1.0 - FPS_EMA_ALPHA) * fps + FPS_EMA_ALPHA * inst
-            last_t = t
-            if record is not None:
-                if writer is None:
-                    writer = _open_writer(cv2, record, cap, frame)
-                writer.write(frame)  # raw frame, before the overlay draws on it
+            last_t, last_now = t, now
             result = pipeline.step(t, frame, idx, fps)
-            overlay.draw(frame, result, cfg, fps)
-            cv2.imshow(WINDOW, frame)
+            idx += 1
+            shown = overlay.draw(frame.copy(), result, cfg, fps)  # frame stays raw for the pilot save
+            cv2.imshow(WINDOW, shown)
             key = cv2.waitKey(1) & 0xFF
             if key == ord("s"):
-                _save_pilot(cv2, frame, result, cfg, wall_offset)
+                _save_pilot(frame, shown, result, cfg, wall_offset)
             elif key in (ord("q"), 27):
                 break
-            idx += 1
-    finally:
-        if pipeline is not None:
-            pipeline.close()
-        pose_backend.close()
-        cap.release()
-        if writer is not None:
-            writer.release()
-        cv2.destroyAllWindows()
-        if store is not None:
-            store.close()
+        if idx == 0:
+            raise _fail(f"source {source!r} opened but yielded no frames", 1)
 
 
 @app.command()
@@ -301,6 +440,8 @@ def extract(
     from .capture import extract_keypoints
     from .detections import save_keypoints
 
+    if not video.exists():
+        raise _fail(f"video not found: {video}", 1)
     pose_backend = _make_live_backend(backend, device)
     try:
         raw = extract_keypoints(video, pose_backend)
@@ -319,6 +460,8 @@ def web(
     port: int = typer.Option(8080, min=1, max=65535, help="TCP port."),
 ) -> None:
     """Serve the dashboard (station status, today's events, weekly summary) to phones on the LAN."""
+    if not db.is_file():  # never create an empty store silently (a typo would show a blank dashboard)
+        raise _fail(f"event store {db} does not exist; start `linesafe run --db {db}` first or fix the path", 2)
     try:
         import fastapi  # noqa: F401
         import uvicorn
