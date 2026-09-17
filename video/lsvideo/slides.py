@@ -29,3 +29,9 @@ def ensure_pngs(pdf: Path, pages: Iterable[int], out_dir: Path) -> None:
             pix.save(png)
     finally:
         doc.close()
+
+
+def edge_color(png: Path) -> str:
+    """The slide's background colour, from its top-left corner, as ffmpeg's 0xRRGGBB."""
+    r, g, b = pymupdf.Pixmap(str(png)).pixel(2, 2)[:3]
+    return f"0x{r:02X}{g:02X}{b:02X}"

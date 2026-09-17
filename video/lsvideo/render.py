@@ -27,8 +27,10 @@ def _crop(clip: Clip) -> str:
     return f"crop={w}:{h}:{x}:{y},"
 
 
-def still_cmd(png: Path, dur: float, out: Path) -> list[str]:
-    return FFMPEG + ["-loop", "1", "-framerate", "30", "-i", str(png), "-t", _s(dur), "-vf", FIT] + PART_ENC + [str(out)]
+def still_cmd(png: Path, dur: float, out: Path, pad_color: str) -> list[str]:
+    # The slide shrinks to 1680x945 near the top so the caption box sits in a band of the slide's own colour below it.
+    vf = f"scale=1680:945,pad=1920:1080:120:10:color={pad_color},setsar=1,fps=30,format=yuv420p"
+    return FFMPEG + ["-loop", "1", "-framerate", "30", "-i", str(png), "-t", _s(dur), "-vf", vf] + PART_ENC + [str(out)]
 
 
 def clip_cmd(clip: Clip, dur: float, out: Path) -> list[str]:

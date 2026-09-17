@@ -81,7 +81,8 @@ def build(shots_path: Path, draft: bool) -> None:
             cmd = render.placeholder_cmd(Path("parts") / label.name, p.dur, out, Path("fonts/IBMPlexSans-400.ttf"))
             kind = "placeholder"
         elif isinstance(visual, Still):
-            cmd, kind = render.still_cmd(visual.png, p.dur, out), f"slide {visual.page}"
+            pad_color = slides.edge_color(visual.png)
+            cmd, kind = render.still_cmd(visual.png, p.dur, out, pad_color), f"slide {visual.page} band {pad_color}"
         elif isinstance(visual, Clip):
             cmd, kind = render.clip_cmd(visual, p.dur, out), "clip"
         elif isinstance(visual, Inset):
