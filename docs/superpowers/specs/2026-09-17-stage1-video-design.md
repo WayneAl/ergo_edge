@@ -8,8 +8,9 @@ Goal: `make video` → `video/dist/linesafe_stage1.mp4`, 1920×1080, ≤180 s, E
 built from `video/shots.toml` + captured footage (gitignored `video/footage/`) + deck PNGs.
 Non-goals: YouTube upload (Wayne), music, motion graphics, Hailo footage (no UGen300 before finals), an editing GUI.
 
-Beats (from slide 12): 1 problem (slide 2) · 2 approach (slide 5) · 3 live demo — box lift, score Low → Medium → High,
-alert, network cable pulled and scoring continues · 4 dashboard on the phone · 5 privacy, Stage II, GitHub link.
+Beats (amended 2026-09-17, no filming): 1 problem (slide 2) · 2 approach (slide 5) · 3 offline replay of public
+construction-site footage — score Low → High, alert, image fades to skeleton only, event · 4 the real dashboard over
+those events in its phone layout · 5 Stage II, close.
 
 ## Data structures
 - `Shot(id, visual, narration, lead_s, hold_s)`; visual = `Still(page, png)` | `Clip(path, in_s, out_s, crop)` |
@@ -34,8 +35,8 @@ alert, network cable pulled and scoring continues · 4 dashboard on the phone ·
 ## Invariants & failure modes
 - Total ≤ 180 s, else fail listing every shot's duration.
 - Narration longer than its clip → fail naming the shot. Footage is never sped up; narration is never cut.
-- Footage is real time: the overlay FPS is whatever was captured. Narration says the demo runs on the laptop today and on
-  the UGen300 in Stage II — never implies the accelerator is in the shot.
+- No filmed footage (Wayne, 2026-09-17). The demo is an offline replay, labelled on screen; narration never claims live
+  capture or the accelerator in the shot, and gives laptop speed only as the pose model's ≈48 FPS (claims row 23).
 - A replay shot (`site_replay`, public footage via `video/site_replay.sh`) is labelled on screen as an offline replay,
   hides the replay HUD's FPS figure, and needs the uploader's written permission before the video is published.
 - Every number spoken is a row in `deck/claims.md`; 🔴 rows are spoken as "we estimate".
@@ -54,6 +55,7 @@ alert, network cable pulled and scoring continues · 4 dashboard on the phone ·
 
 ## Open decisions
 A. Voice: a) `en-US-AndrewNeural` (yt_audiobook en_public) · b) `en-US-AvaNeural` (en_summary).
+B–C superseded 2026-09-17 by the no-filming decision (replay of public footage + dashboard render).
 B. Demo footage: a) screen-capture the live `run` window + phone wide shot as inset (shows the real live FPS) ·
    b) record raw, render the overlay offline (cleaner, but not live; needs a `run --out` change on `prototype`).
 C. Filming: a) same sitting as Task 10, after step 4 · b) a separate session.

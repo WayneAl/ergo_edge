@@ -11,9 +11,9 @@ fonts="$root/video/build/fonts"
 linesafe=${LINESAFE:-$root/.claude/worktrees/prototype/.venv/bin/linesafe}
 station=${STATION:-$root/.claude/worktrees/prototype/stations/example.toml}
 weights=${WEIGHTS:-$HOME/Documents/GitHub/golf_coach/yolov8m-pose.pt}
-start=${START:-41}      # excerpt start in the source, seconds
-length=${LENGTH:-18}    # excerpt length, seconds
-fade_at=${FADE_AT:-5}   # camera image fades out here, over 1.5 s
+start=${START:-20}      # excerpt start in the source, seconds
+length=${LENGTH:-60}    # excerpt length, seconds
+fade_at=${FADE_AT:-29}   # camera image fades out here, over 1.5 s
 
 [ -f "$src" ] || { echo "missing $src" >&2; exit 1; }
 [ -x "$linesafe" ] || { echo "missing linesafe CLI at $linesafe (set LINESAFE)" >&2; exit 1; }

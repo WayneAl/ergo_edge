@@ -1,5 +1,7 @@
 # Demo video — shoot guide (Wayne)
 
+> Superseded 2026-09-17: no filming. The demo uses `video/site_replay.sh` and `video/dashboard_view.sh` instead.
+
 Same sitting as the Task 10 session, right after step 4. About 15 minutes. You need the Task 10 setup (webcam, box,
 side-on space), the phone on a stand or propped up, and two terminals: one in the prototype worktree for `linesafe run`,
 one in `~/Documents/GitHub/ergo_edge/.claude/worktrees/video` for `video/capture.sh`.

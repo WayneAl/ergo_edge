@@ -21,77 +21,56 @@ Plain geometry turns them into joint angles, and the published REBA and RULA tab
 same posture always gives the same score, and every score names the angle behind it.
 """
 
-[[shot]]
-id = "lift_intro"
-clip = "video/footage/overlay_lift.mp4"
-in_s = 2.0
-out_s = 14.0
-pip = "video/footage/phone_lift.mp4"
-pip_in_s = 2.0
-pip_out_s = 14.0
-lead_s = 1.0
-narration = """
-This is the prototype, running live on a laptop. In Stage Two, the same pipeline moves onto the ASUS UGen300.
-"""
-
-[[shot]]
-id = "lift_climb"
-clip = "video/footage/overlay_lift.mp4"
-in_s = 14.0
-out_s = 32.0
-pip = "video/footage/phone_lift.mp4"
-pip_in_s = 14.0
-pip_out_s = 32.0
-narration = """
-Upright, the score is Low. As the trunk bends to reach the box, it climbs to Medium, then to High.
-"""
-
-[[shot]]
-id = "lift_alert"
-clip = "video/footage/overlay_lift.mp4"
-in_s = 32.0
-out_s = 50.0
-pip = "video/footage/phone_lift.mp4"
-pip_in_s = 32.0
-pip_out_s = 50.0
-narration = """
-Held in High for a few seconds, the posture raises an alert, and an event is stored with the angles that drove it.
-"""
-
-[[shot]]
-id = "offline"
-clip = "video/footage/overlay_offline.mp4"
-in_s = 2.0
-out_s = 20.0
-pip = "video/footage/phone_offline.mp4"
-pip_in_s = 2.0
-pip_out_s = 20.0
-narration = """
-Now the laptop goes offline. Scoring carries on, because nothing ever needs to leave the room.
-"""
-
-[[shot]]
-id = "dashboard"
-clip = "video/footage/phone_dashboard.mp4"
-in_s = 1.0
-out_s = 25.0
-narration = """
-Back on the plant network, the safety manager opens the dashboard on a phone. Each event shows the station, the time,
-the peak score and the angles behind it. No video is stored and no one is identified. The system rates the task, not
-the person.
-"""
-
-# Public footage (YouTube 27N3I5kvbjk), composited by video/site_replay.sh.
+# Public footage (YouTube 27N3I5kvbjk), composited by video/site_replay.sh (source 0:20–1:20, fade at 0:49).
 # Publish this video only after the uploader has given written permission.
 [[shot]]
-id = "site_replay"
+id = "site_intro"
 clip = "video/footage/site_replay.mp4"
 in_s = 0.0
-out_s = 18.0
+out_s = 8.0
+narration = """
+Public footage from a construction site, replayed offline through the prototype on a laptop.
+"""
+
+[[shot]]
+id = "site_climb"
+clip = "video/footage/site_replay.mp4"
+in_s = 8.0
+out_s = 27.0
+narration = """
+Upright, the score is Low. As the worker bends to lift the tiles, it climbs through Medium to High, and holding the
+bend raises an alert. The pose model runs at about 48 frames per second on the laptop.
+"""
+
+[[shot]]
+id = "site_fade"
+clip = "video/footage/site_replay.mp4"
+in_s = 27.0
+out_s = 42.0
+lead_s = 1.5
+narration = """
+Once the skeleton is extracted, the image is thrown away. The next lift is scored from the skeleton alone.
+"""
+
+[[shot]]
+id = "site_event"
+clip = "video/footage/site_replay.mp4"
+in_s = 42.0
+out_s = 60.0
 lead_s = 1.0
 narration = """
-The same engine, replayed offline on public footage of a tile carrier at a construction site. Once the skeleton is
-extracted, the image is thrown away, and the score comes from the skeleton alone.
+Every posture held in High becomes an event, stored with the angles that drove it, here trunk flexion and a raised arm.
+"""
+
+# The real dashboard over the replay's events, phone layout, by video/dashboard_view.sh.
+[[shot]]
+id = "dashboard"
+clip = "video/footage/dashboard_phone.mp4"
+in_s = 0.0
+out_s = 22.0
+narration = """
+The safety manager's dashboard, shown in its phone layout, lists each event with the station, the time, the peak
+score and the angles behind it. No video is stored, no one is identified, and nothing leaves the plant network.
 """
 
 [[shot]]

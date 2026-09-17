@@ -3,7 +3,7 @@
 ## Plans
 - 🟡 DRAFT DONE — Stage I proposal deck: `deck/dist/proposal.pdf` via `make pdf` (18 body + 3 appendix), reviewed and fact-checked. `make check` blocks final only on slide 12's prototype-evidence TODO. No UGen300 before Stage I (finalist unit only); slide 12 cites Hailo's published Hailo-10H FPS.
 - 🟡 BUILT, AWAITING LIVE SAMPLE — laptop prototype (sub-project 2): branch `prototype` (worktree `.claude/worktrees/prototype`, head 6ca8b14) — 9 plan tasks done, each reviewed + fix rounds, final whole-branch review fixed; 352 tests; real e2e sample done on a GolfDB clip (extract with ultralytics → replay → SQLite → web API). NOT merged: the camera path (`run`, `record`) needs Task 10 with Wayne — guide `docs/evidence/task10-session-guide.md`. Ledger `.claude/sdd/2026-09-17-laptop-prototype/progress.md`.
-- ✅ COMPLETE (pipeline) — Stage I demo video: `make video DRAFT=1` builds a 160.90 s draft with Edge TTS narration and captions; footage shots are placeholders until the shoot (`docs/evidence/video-shoot-guide.md`, after Task 10). Log `docs/superpowers/log/2026-09-17-stage1-video.md`.
+- 🟡 BUILT, AWAITING PERMISSION — Stage I demo video: `make video` builds `video/dist/linesafe_stage1.mp4` (146.90 s) with no filming: offline replay of public site footage (`video/site_replay.sh`) + dashboard render (`video/dashboard_view.sh`). Publish only after the YouTube uploader's written permission (Wayne). Log `docs/superpowers/log/2026-09-17-stage1-video.md`.
 
 ## What's next
 - Sub-project 1: Stage I proposal deck (English PDF, ≤20 body pages).

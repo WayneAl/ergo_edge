@@ -27,10 +27,9 @@ Merged: `a957858` (branch `video`: c2bf82d, de4f380, 761dc11, 2ac7b0b, 015ae1f).
   `apad`, `-t total` hide it) → pre-render source-length check + post-render part-duration check, repro before/after.
 
 ## Backlog
-- Footage not shot yet: `overlay_lift`, `phone_lift`, `overlay_offline`, `phone_offline`, `phone_dashboard` (guide above,
-  same sitting as Task 10). After the shoot: tune in/out/crop, align narration with what the overlay really shows,
-  full build, watch end to end, Wayne uploads unlisted to YouTube.
-- `site_replay` (18 s, source 0:41–0:59 of YouTube 27N3I5kvbjk): overlay fades to skeleton only; publish only after
-  the uploader's written permission (Wayne is handling it). Source and composite are gitignored under `video/footage/`.
+- No filming (decided after the pipeline landed): the demo is `video/site_replay.sh` (YouTube 27N3I5kvbjk, source
+  0:20–1:20, overlay fading to skeleton only at 0:49) cut into site_intro/climb/fade/event, plus `video/dashboard_view.sh`
+  (real dashboard over the replay's events, headless Chrome at 500 px, scrolled). Full `make video` = 146.90 s, narration
+  checked against the on-screen scores. Publish only after the uploader's written permission (Wayne is handling it).
 - Captions: leading punctuation and a dash at a line break are not shown; `\` is not escaped (none in the script).
 - `check_sources` uses container duration; a phone file with longer audio than video is caught only by `check_part`.
