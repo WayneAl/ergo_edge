@@ -525,8 +525,8 @@
 
 <!-- ============================== 12 Feasibility ============================== -->
 <section class="slide">
-  <!-- TODO: prototype evidence (REBA/RULA engine live on the laptop: FPS, worked-example tests, pilot check); retitle once it runs -->
-  <h1>The pose front half already runs; the scoring tables are next.</h1>
+  <!-- TODO: prototype evidence still missing — pilot check (engine angles vs hand-measured angles) -->
+  <h1>Pose, scoring and the dashboard already run end to end on the laptop.</h1>
   <div class="head-gap"></div>
   <div class="cols cols-2 gap-l">
     <div>
@@ -534,7 +534,8 @@
       <div class="big">≈ 48<span class="unit">FPS</span></div>
       <p class="fig-label"><code>yolov8m-pose</code> on an Apple M4 Pro (MPS, 640 px model input) — our own measurement, from the previous project</p>
       <ul class="rules mt-m">
-        <li>One-Euro smoothing of keypoint tracks, and gap filling for short drop-outs</li>
+        <li>REBA/RULA scoring, events and dashboard, on recorded footage</li>
+        <li>One-Euro smoothing and short-gap filling of keypoints</li>
         <li>Hailo <code>.hef</code> adapter written against the pyHailoRT 5.3 API — <strong>not yet run on hardware</strong></li>
         <li>On Hailo-10H, Hailo publishes <strong>79 FPS</strong> for <code>yolov8m_pose</code> (640 px, batch 1, accelerator only)<sup class="ref">R24</sup>. It needs the 10 Gbps USB-C port: one UGen300 user’s throughput almost doubled after leaving a 5 Gbps link<sup class="ref">R25</sup>.</li>
       </ul>
@@ -542,10 +543,10 @@
     <div>
       <h2>What the Stage I video shows</h2>
       <ol class="beats">
-        <li>A volunteer lifts a box at a mock station, scored live on the laptop.</li>
+        <li>Public footage of a tile carrier on a construction site, replayed offline on the laptop.</li>
         <li>The score climbs <span class="chip ok">Low</span> → <span class="chip warn">Medium</span> → <span class="chip high">High</span> and the alert fires.</li>
-        <li>The network cable is pulled; scoring carries on.</li>
-        <li>The dashboard opens on a phone.</li>
+        <li>The image fades out; the skeleton keeps scoring.</li>
+        <li>The events appear on the dashboard, in its phone layout.</li>
       </ol>
       <h2 class="mt-m">Known limits, stated plainly</h2>
       <ul class="rules">
