@@ -279,12 +279,12 @@ def pose(points, conf=0.9, low=()):
         c[i] = 0.0
     return PoseFrame(t=0.0, kpts=k, conf=c, bbox=(0.0, 0.0, 400.0, 600.0))
 
-def upright(**over):
+def upright(over=()):
     p = {K.NOSE: (115, 178), K.L_EAR: (100, 180), K.R_EAR: (100, 180),
          K.L_SHOULDER: (102, 200), K.R_SHOULDER: (98, 200), K.L_HIP: (102, 300), K.R_HIP: (98, 300),
          K.L_ELBOW: (102, 250), K.R_ELBOW: (98, 250), K.L_WRIST: (102, 300), K.R_WRIST: (98, 300),
          K.L_KNEE: (102, 400), K.R_KNEE: (98, 400), K.L_ANKLE: (102, 500), K.R_ANKLE: (98, 500)}
-    p.update(over); return p
+    p.update(dict(over)); return p
 
 def deg(a):
     assert isinstance(a, Measured), a
@@ -305,7 +305,7 @@ def lean(deg_, facing_=1):
     dx, dy = 100 * math.sin(math.radians(deg_)) * facing_, -100 * math.cos(math.radians(deg_))
     sh = (100 + dx, 300 + dy)
     ear = (sh[0], sh[1] - 20); nose = (ear[0] + 15 * facing_, ear[1] - 2)
-    return upright(**{K.L_SHOULDER: sh, K.R_SHOULDER: sh, K.L_HIP: (100, 300), K.R_HIP: (100, 300),
+    return upright({K.L_SHOULDER: sh, K.R_SHOULDER: sh, K.L_HIP: (100, 300), K.R_HIP: (100, 300),
                       K.L_EAR: ear, K.R_EAR: ear, K.NOSE: nose})
 
 def test_trunk_flexion_45_facing_right():
@@ -319,7 +319,7 @@ def test_trunk_extension_is_negative():
     assert deg(compute_angles(pose(lean(-20))).trunk_flex) == pytest.approx(-20, abs=0.01)
 
 def test_upper_arm_forward_90_and_back_30():
-    p = upright(**{K.L_ELBOW: (152, 200), K.R_ELBOW: (98 - 25, 200 + 43.30127)})
+    p = upright({K.L_ELBOW: (152, 200), K.R_ELBOW: (98 - 25, 200 + 43.30127)})
     a = compute_angles(pose(p))
     assert deg(a.upper_arm[LEFT]) == pytest.approx(90, abs=0.01)
     assert deg(a.upper_arm[RIGHT]) == pytest.approx(-30, abs=0.01)
@@ -331,16 +331,16 @@ def test_upper_arm_is_relative_to_trunk():
     assert deg(compute_angles(pose(p)).upper_arm[LEFT]) == pytest.approx(45, abs=0.01)
 
 def test_elbow_90():
-    p = upright(**{K.L_SHOULDER: (100, 200), K.L_ELBOW: (100, 250), K.L_WRIST: (150, 250)})
+    p = upright({K.L_SHOULDER: (100, 200), K.L_ELBOW: (100, 250), K.L_WRIST: (150, 250)})
     assert deg(compute_angles(pose(p)).lower_arm[LEFT]) == pytest.approx(90, abs=0.01)
 
 def test_knee_60():
-    p = upright(**{K.L_HIP: (100, 300), K.L_KNEE: (100, 400), K.L_ANKLE: (186.60254, 450)})
+    p = upright({K.L_HIP: (100, 300), K.L_KNEE: (100, 400), K.L_ANKLE: (186.60254, 450)})
     assert deg(compute_angles(pose(p)).knee[LEFT]) == pytest.approx(60, abs=0.01)
 
 def test_neck_flexion_30():
     ear = (100 + 20 * math.sin(math.radians(30)), 200 - 20 * math.cos(math.radians(30)))
-    p = upright(**{K.L_SHOULDER: (100, 200), K.R_SHOULDER: (100, 200), K.L_HIP: (100, 300),
+    p = upright({K.L_SHOULDER: (100, 200), K.R_SHOULDER: (100, 200), K.L_HIP: (100, 300),
                    K.R_HIP: (100, 300), K.L_EAR: ear, K.R_EAR: ear, K.NOSE: (ear[0] + 15, ear[1])})
     assert deg(compute_angles(pose(p)).neck_flex) == pytest.approx(30, abs=0.01)
 
@@ -350,7 +350,7 @@ def test_missing_elbow_is_missing_with_reason():
     assert isinstance(a.upper_arm[RIGHT], Measured)
 
 def test_front_view_detected_and_blocks_flexion():
-    p = upright(**{K.L_SHOULDER: (60, 200), K.R_SHOULDER: (140, 200)})
+    p = upright({K.L_SHOULDER: (60, 200), K.R_SHOULDER: (140, 200)})
     assert classify_view(pose(p)) is View.FRONT
     a = compute_angles(pose(p), view_ok=False)
     assert isinstance(a.trunk_flex, Missing) and "front" in a.trunk_flex.reason
@@ -363,15 +363,15 @@ def test_facing_unknown_blocks_signed_angles():
     assert isinstance(a.lower_arm[LEFT], Measured)       # unsigned angles do not need facing
 
 def test_one_foot_raised_is_not_bilateral():
-    a = compute_angles(pose(upright(**{K.R_ANKLE: (98, 440)})))
+    a = compute_angles(pose(upright({K.R_ANKLE: (98, 440)})))
     assert a.legs_bilateral is False
 
 def test_twist_proxy():
-    p = upright(**{K.L_SHOULDER: (60, 200), K.R_SHOULDER: (140, 200), K.L_HIP: (95, 300), K.R_HIP: (105, 300)})
+    p = upright({K.L_SHOULDER: (60, 200), K.R_SHOULDER: (140, 200), K.L_HIP: (95, 300), K.R_HIP: (105, 300)})
     assert compute_angles(pose(p)).trunk_twisted is True
 
 def test_facing_needs_nose_offset():
-    p = upright(**{K.NOSE: (101, 178)})
+    p = upright({K.NOSE: (101, 178)})
     assert facing(pose(p)) is None
 ```
 
