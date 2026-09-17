@@ -90,6 +90,9 @@ def test_front_view_detected_and_blocks_flexion():
     a = compute_angles(pose(p), view_ok=False)
     assert isinstance(a.trunk_flex, Missing) and "front" in a.trunk_flex.reason
     assert isinstance(a.knee[LEFT], Missing)
+    for angle in (a.trunk_flex, a.neck_flex, *a.upper_arm, *a.lower_arm, *a.knee):
+        assert isinstance(angle, Missing) and "front" in angle.reason
+    assert not isinstance(a.trunk_twisted, Missing) and not isinstance(a.legs_bilateral, Missing)
 
 def test_facing_unknown_blocks_signed_angles():
     a = compute_angles(pose(upright(), low=(K.NOSE,)))
@@ -120,7 +123,7 @@ def test_no_usable_torso_propagates_to_legs_and_twist():
     a = compute_angles(pose(p))
     assert a.trunk_twisted == Missing("degenerate torso") and a.legs_bilateral == Missing("degenerate torso")
 
-@pytest.mark.parametrize("field, value", [("conf_min", -0.1), ("conf_min", 1.5), ("front_ratio_min", 0.0),
+@pytest.mark.parametrize("field, value", [("conf_min", 0.0), ("conf_min", 1.01), ("front_ratio_min", 0.0),
                                           ("legs_level_frac", -0.1), ("twist_frac", -0.1),
                                           ("neck_offset_deg", math.nan)])
 def test_bad_geometry_params_raise_naming_the_field(field, value):
@@ -135,3 +138,53 @@ def test_pose_frame_rejects_bad_input():
         PoseFrame(t=0.0, kpts=k[:16], conf=c, bbox=box)
     with pytest.raises(ValueError, match="PoseFrame.bbox"):
         PoseFrame(t=0.0, kpts=k, conf=c, bbox=box[:3])
+
+def test_facing_left_signs_neck_and_arms():
+    # trunk 30 deg flexed facing left: u = (-0.5, -0.866), f = (-0.866, 0.5)
+    sh = (300 - 100 * math.sin(math.radians(30)), 400 - 100 * math.cos(math.radians(30)))   # (250, 313.397)
+    ear = (sh[0] - 5, sh[1] - 23.40)
+    p = upright({K.L_HIP: (300, 400), K.R_HIP: (300, 400), K.L_SHOULDER: sh, K.R_SHOULDER: sh,
+                 K.L_ELBOW: (sh[0] - 50, sh[1]), K.L_WRIST: (sh[0] - 50, sh[1] - 40),
+                 K.R_ELBOW: (sh[0], sh[1] + 50), K.R_WRIST: (sh[0], sh[1] + 100),
+                 K.L_EAR: ear, K.R_EAR: ear, K.NOSE: (ear[0] - 15, ear[1] - 2)})
+    a = compute_angles(pose(p))
+    assert a.facing == -1
+    assert deg(a.trunk_flex) == pytest.approx(30, abs=0.01)
+    assert deg(a.neck_flex) == pytest.approx(-17.94, abs=0.01)
+    assert deg(a.upper_arm[LEFT]) == pytest.approx(120, abs=0.01)
+    assert deg(a.upper_arm[RIGHT]) == pytest.approx(30, abs=0.01)
+    assert deg(a.lower_arm[LEFT]) == pytest.approx(90, abs=0.01)
+
+@pytest.mark.parametrize("true_deg", [190, -60, 180])
+def test_upper_arm_range_is_minus90_to_270(true_deg):
+    r = math.radians(true_deg)
+    p = upright({K.L_ELBOW: (102 + 50 * math.sin(r), 200 + 50 * math.cos(r))})
+    assert deg(compute_angles(pose(p)).upper_arm[LEFT]) == pytest.approx(true_deg, abs=0.01)
+
+def test_pose_frame_rejects_non_finite_kpts_and_conf():
+    k, c, box = np.zeros((17, 2), np.float32), np.ones(17, np.float32), (0.0, 0.0, 1.0, 1.0)
+    bad_k, bad_c = k.copy(), c.copy()
+    bad_k[K.L_ELBOW, 0], bad_c[K.NOSE] = math.nan, math.inf
+    with pytest.raises(ValueError, match="PoseFrame.kpts"):
+        PoseFrame(t=0.0, kpts=bad_k, conf=c, bbox=box)
+    with pytest.raises(ValueError, match="PoseFrame.conf"):
+        PoseFrame(t=0.0, kpts=k, conf=bad_c, bbox=box)
+
+def test_sub_pixel_segments_are_degenerate():
+    p = upright({K.L_ELBOW: (102, 200.5), K.L_ANKLE: (102, 400.5), K.L_EAR: (100, 199.5), K.R_EAR: (100, 199.5)})
+    a = compute_angles(pose(p))
+    for angle in (a.upper_arm[LEFT], a.lower_arm[LEFT], a.knee[LEFT], a.neck_flex):
+        assert isinstance(angle, Missing) and "degenerate" in angle.reason
+
+@pytest.mark.parametrize("low, field, reason", [
+    ((K.L_SHOULDER, K.R_SHOULDER), "trunk_flex", "no confident shoulders"),
+    ((K.L_HIP, K.R_HIP), "trunk_flex", "no confident hips"),
+    ((K.L_EAR, K.R_EAR), "neck_flex", "no confident ear"),
+    ((K.L_ANKLE,), "legs_bilateral", "ankle not confident"),
+    ((K.L_HIP,), "trunk_twisted", "shoulders or hips not confident"),
+])
+def test_missing_reasons(low, field, reason):
+    assert getattr(compute_angles(pose(upright(), low=low)), field) == Missing(reason)
+
+def test_facing_falls_back_to_nose_vs_shoulders():
+    assert facing(pose(upright({K.NOSE: (97, 178)}), low=(K.L_EAR, K.R_EAR))) == -1

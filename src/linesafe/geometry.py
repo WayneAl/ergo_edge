@@ -57,9 +57,9 @@ class GeometryParams:
     neck_offset_deg: float = 0.0  # subtracted from neck flexion; calibrated in the pilot check
 
     def __post_init__(self) -> None:
-        if not 0.0 <= self.conf_min <= 1.0:
+        if not 0.0 < self.conf_min <= 1.0:
             raise ValueError(
-                f"GeometryParams.conf_min must be in [0, 1], got {self.conf_min}"
+                f"GeometryParams.conf_min must be in (0, 1], got {self.conf_min}"
             )
         if not self.front_ratio_min > 0:
             raise ValueError(
@@ -94,6 +94,7 @@ class Angles:
 
 
 _FRONT_VIEW = "front view on a side-view station"
+_MIN_SEGMENT_PX = 1.0  # torso and limb segments shorter than this are degenerate
 
 # (shoulder, elbow, wrist, hip, knee, ankle), indexed by LEFT / RIGHT
 _SIDES = (
@@ -139,7 +140,7 @@ def _trunk(pose: PoseFrame, params: GeometryParams) -> _Trunk | Missing:
         return Missing("no confident hips")
     torso = sh[0] - hp[0]
     length = float(math.hypot(torso[0], torso[1]))
-    if length < 1:
+    if length < _MIN_SEGMENT_PX:
         return Missing("degenerate torso")
     return _Trunk(sh[0], torso, length, torso / length, min(sh[1], hp[1]))
 
@@ -190,9 +191,9 @@ def _flexion(pose: PoseFrame, params: GeometryParams, a: int, b: int, c: int) ->
     p = _points(pose)
     va, vc = p[a] - p[b], p[c] - p[b]
     na, nc = math.hypot(va[0], va[1]), math.hypot(vc[0], vc[1])
-    if na == 0:
+    if na < _MIN_SEGMENT_PX:
         return Missing(f"degenerate {K.NAMES[a]}-{K.NAMES[b]}")
-    if nc == 0:
+    if nc < _MIN_SEGMENT_PX:
         return Missing(f"degenerate {K.NAMES[b]}-{K.NAMES[c]}")
     cos = float(np.clip(np.dot(va, vc) / (na * nc), -1.0, 1.0))
     interior = math.degrees(math.acos(cos))
@@ -255,7 +256,7 @@ def compute_angles(
             neck_flex = Missing("no confident ear")
         else:
             h = ears[0] - trunk.shoulder_mid
-            if math.hypot(h[0], h[1]) == 0:
+            if math.hypot(h[0], h[1]) < _MIN_SEGMENT_PX:
                 neck_flex = Missing("degenerate neck")
             else:
                 neck = math.degrees(math.atan2(np.dot(h, f), np.dot(h, u)))
@@ -269,11 +270,14 @@ def compute_angles(
                 arms.append(missing)
                 continue
             v = p[el_i] - p[sh_i]
-            if math.hypot(v[0], v[1]) == 0:
+            if math.hypot(v[0], v[1]) < _MIN_SEGMENT_PX:
                 arms.append(Missing(f"degenerate {K.NAMES[sh_i]}-{K.NAMES[el_i]}"))
                 continue
             conf = float(min(trunk.conf, pose.conf[sh_i], pose.conf[el_i]))
-            arms.append(Measured(math.degrees(math.atan2(np.dot(v, f), np.dot(v, -u))), conf))
+            arm = math.degrees(math.atan2(np.dot(v, f), np.dot(v, -u)))
+            if arm <= -90:
+                arm += 360  # range (-90, 270]: an overhead reach past 180 stays flexion
+            arms.append(Measured(arm, conf))
         upper_arm = (arms[0], arms[1])
 
     # Unsigned angles: need neither trunk nor facing.

@@ -27,6 +27,10 @@ class PoseFrame:
         if not math.isfinite(t):
             raise ValueError(f"PoseFrame.t must be finite, got {self.t}")
         kpts, conf = _check_kpts_conf(self.kpts, self.conf, "PoseFrame")
+        if not np.isfinite(kpts).all():
+            raise ValueError("PoseFrame.kpts must be finite")
+        if not np.isfinite(conf).all():
+            raise ValueError("PoseFrame.conf must be finite")
         bbox = tuple(float(v) for v in self.bbox)
         if len(bbox) != 4:
             raise ValueError(f"PoseFrame.bbox must have 4 values, got {len(bbox)}")
