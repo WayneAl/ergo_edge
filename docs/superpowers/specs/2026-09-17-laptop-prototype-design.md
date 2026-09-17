@@ -27,8 +27,9 @@ weekly report (static mock page only), installer, 3D.
 ## Interfaces (pure core; I/O only in capture, backend, store, ui)
 `capture.frames(source) -> Iterator[(t, frame)]` → `backend.infer` → `Tracker.update(t, dets) -> PoseFrame|None`
 → `angles.compute(pose) -> Angles` → `reba.score(angles, cfg) -> RebaScore` (+ `rula.score`) →
-`Activity.update(score) -> RebaScore` (+1 static > 1 min, +1 repeat > 4/min, +1 rapid change) →
-`Events.update(score) -> Event|None` (enter High ≥ 3 s, leave below Medium ≥ 3 s) → `store.add(event)`;
+`Activity.update(angles) -> flags` (REBA: +1 static > 1 min, +1 repeat > 4/min, +1 rapid change;
+RULA muscle use: static > 10 min or repeat ≥ 4/min — both worksheets agree) →
+`Events.update(score) -> Event|None` (enter High ≥ 3 s, leave below High ≥ 3 s) → `store.add(event)`;
 `ui.overlay.draw(frame, pose, angles, score)`; `web` serves events JSON + one static page on the LAN.
 CLI: `linesafe run`, `linesafe replay --keypoints f.json` (same pipeline, no camera), `linesafe web`.
 
@@ -49,9 +50,8 @@ CLI: `linesafe run`, `linesafe replay --keypoints f.json` (same pipeline, no cam
   Single, uncertified rater: labelled "pilot check" on slide 12; the κ study stays Stage II.
 - End-to-end FPS on the M4 Pro with a 1080p webcam.
 
-## Open decisions
-A. Side-view single camera for v1 (rec.) vs front + side cameras.
-B. REBA first, RULA after events work (rec.) vs both from day one.
-C. Wrist = station default (rec.) vs MediaPipe hands on the laptop (no Hailo parity).
-D. Dashboard: tiny FastAPI + one static page (rec.) vs Streamlit.
-E. Pilot check rater: yourself on photo-measured angles (rec., honest label) vs an OSH assessor you can reach.
+## Decisions (locked 2026-09-17, Wayne: 全照建議)
+A. Side-view single camera. B. REBA first, RULA after events. C. Wrist = station default.
+D. FastAPI + one static page. E. Pilot check rated by Wayne on photo-measured angles, labelled "pilot check".
+Tables: verified cell by cell against two independent sources each → `tests/fixtures/worksheet_tables.py`.
+Amended: events close after 3 s below High (below-Medium would keep a High event open through long Medium work).
