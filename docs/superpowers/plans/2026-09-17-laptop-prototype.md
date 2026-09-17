@@ -759,7 +759,8 @@ Signals: `trunk = angles.trunk_flex.deg` when Measured; `arm = max(deg of Measur
   `lo/hi` with `v`; `v - lo >= rep_amp_deg` → `dir = +1, ext = v`; `hi - v >= rep_amp_deg` → `dir = -1, ext = v`
   (amended after the Task 6 review: measuring from a fixed first sample missed oscillations that start mid-swing). `dir == +1`: `v > ext` → `ext = v`; elif
   `ext - v >= rep_amp_deg` → append `t` to reversals, `dir = -1, ext = v`. `dir == -1` mirrored. Drop reversal
-  times `< t - window_s`. `actions = len(reversals) // 2`.
+  times `< t - window_s`. `actions = (len(reversals) + 1) // 2` (amended after the final review: N bend-and-return
+  cycles followed by rest give 2N−1 confirmed reversals, so `// 2` undercounted a burst by one).
   `repeated = max(actions(trunk), actions(arm)) > rep_per_min`.
 - *rapid*: a deque of trunk samples within `[t - rapid_window_s, t]`; `max - min >= rapid_deg` → `last_rapid_t = t`;
   `rapid = last_rapid_t is not None and t - last_rapid_t <= rapid_hold_s`.
@@ -1084,7 +1085,9 @@ class Pipeline:
 BAND_BGR: dict[Band, tuple[int, int, int]]   # negligible/low (87,139,46), medium (13,147,217), high (47,105,228), very high (27,55,200)
 def draw(frame_bgr: np.ndarray, result: FrameResult, cfg: StationConfig, fps: float) -> np.ndarray   # draws in place, returns frame
 ```
-`Pipeline.step`: `dets = backend.infer(frame_bgr, idx)` → `pose = tracker.update(t, dets)`; pose None → view None,
+`Pipeline.step`: `dets = backend.infer(frame_bgr, idx)` → `pose = tracker.update(t, dets)`; when `tracker.track_id`
+changed since the last frame (a new person was seeded), the ActivityTracker is replaced with a fresh one — activity
+belongs to a body — while the EventDetector (station-level) is kept (amended after the final review); pose None → view None,
 angles None, reba/rula None; else `view = classify_view(pose, params.geometry)`, wrong-view debounce (a frame without a pose neither advances nor resets it; FRONT since ≥ `wrong_view_s` →
 True; any SIDE resets), `angles = compute_angles(pose, params.geometry, view_ok=(view is View.SIDE))` —
 every FRONT frame is unscored immediately (the twist proxy and flexion angles are meaningless from the front; amended after
