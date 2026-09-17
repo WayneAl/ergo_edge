@@ -754,9 +754,10 @@ Signals: `trunk = angles.trunk_flex.deg` when Measured; `arm = max(deg of Measur
   `run_min = run_max = v`; else widen `run_min/run_max`. `last_t = t`.
   *held(signal, span)* = `last_t is not None and last_t >= t - max_gap_s and run_start <= t - span`.
   `static = held(trunk, window_s) or held(arm, window_s)`.
-- *zig-zag* state `dir` (0 unknown, +1, −1), `ext`, `ref`, and a deque of reversal times. On a sample `v`
-  (a gap longer than `max_gap_s` first resets `dir = 0, ref = v`): `dir == 0`: `v - ref >= rep_amp_deg` →
-  `dir = +1, ext = v`; `ref - v >= rep_amp_deg` → `dir = -1, ext = v`. `dir == +1`: `v > ext` → `ext = v`; elif
+- *zig-zag* state `dir` (0 unknown, +1, −1), `ext`, `lo`, `hi`, and a deque of reversal times. On a sample `v`
+  (the first sample, or a gap longer than `max_gap_s`, first resets `dir = 0, lo = hi = v`): `dir == 0`: widen
+  `lo/hi` with `v`; `v - lo >= rep_amp_deg` → `dir = +1, ext = v`; `hi - v >= rep_amp_deg` → `dir = -1, ext = v`
+  (amended after the Task 6 review: measuring from a fixed first sample missed oscillations that start mid-swing). `dir == +1`: `v > ext` → `ext = v`; elif
   `ext - v >= rep_amp_deg` → append `t` to reversals, `dir = -1, ext = v`. `dir == -1` mirrored. Drop reversal
   times `< t - window_s`. `actions = len(reversals) // 2`.
   `repeated = max(actions(trunk), actions(arm)) > rep_per_min`.
