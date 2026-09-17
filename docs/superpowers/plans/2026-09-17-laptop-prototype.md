@@ -1080,7 +1080,7 @@ BAND_BGR: dict[Band, tuple[int, int, int]]   # negligible/low (87,139,46), mediu
 def draw(frame_bgr: np.ndarray, result: FrameResult, cfg: StationConfig, fps: float) -> np.ndarray   # draws in place, returns frame
 ```
 `Pipeline.step`: `dets = backend.infer(frame_bgr, idx)` → `pose = tracker.update(t, dets)`; pose None → view None,
-angles None, reba/rula None; else `view = classify_view(pose)`, wrong-view debounce (FRONT since ≥ `wrong_view_s` →
+angles None, reba/rula None; else `view = classify_view(pose, params.geometry)`, wrong-view debounce (FRONT since ≥ `wrong_view_s` →
 True; any SIDE resets), `angles = compute_angles(pose, params.geometry, view_ok=not wrong_view)` (and
 `classify_view(pose, params.geometry)` — both calls use the same params);
 `flags = activity.update(t, angles)`; `reba = score_reba(angles, cfg, flags.reba_points) if angles else None`;
