@@ -2,7 +2,7 @@ CHROME ?= /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 DECK := deck
 DIST := $(DECK)/dist
 PDF := $(DIST)/proposal.pdf
-PY := uv run --with pymupdf python
+PY := uv run --no-project --with pymupdf python
 
 .PHONY: pdf png check all clean
 
