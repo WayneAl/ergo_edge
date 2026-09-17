@@ -11,11 +11,13 @@ A frame with ``angles is None`` or a missing signal adds no sample to that signa
     least ``span`` seconds without a gap longer than ``max_gap_s``, and its last
     sample is no older than ``max_gap_s``.
   * *actions(signal)*: reversals of at least ``rep_amp_deg`` travel within the last
-    ``window_s`` seconds, halved (a flex-and-return is one action).
+    ``window_s`` seconds, halved (a flex-and-return is one action). The first
+    direction is set once the signal has travelled ``rep_amp_deg`` from its lowest or
+    highest value since the first sample or the last gap, so a start mid-swing counts.
   * *rapid*: the trunk ranged by at least ``rapid_deg`` within ``rapid_window_s``
     at some point in the last ``rapid_hold_s`` seconds.
 
-Time is in seconds and must not go backwards.
+Time is in seconds and must strictly increase.
 """
 
 from __future__ import annotations
@@ -88,7 +90,8 @@ class _Signal:
         self.run_max = 0.0
         # zig-zag
         self.dir = 0  # 0 unknown, +1 rising, -1 falling
-        self.ref = 0.0
+        self.lo = 0.0  # range seen while dir == 0
+        self.hi = 0.0
         self.ext = 0.0
         self.reversals: deque[float] = deque()
 
@@ -104,11 +107,13 @@ class _Signal:
 
         if gap:
             self.dir = 0
-            self.ref = v
+            self.lo = self.hi = v
         if self.dir == 0:
-            if v - self.ref >= p.rep_amp_deg:
+            self.lo = min(self.lo, v)
+            self.hi = max(self.hi, v)
+            if v - self.lo >= p.rep_amp_deg:
                 self.dir, self.ext = 1, v
-            elif self.ref - v >= p.rep_amp_deg:
+            elif self.hi - v >= p.rep_amp_deg:
                 self.dir, self.ext = -1, v
         elif self.dir == 1:
             if v > self.ext:
@@ -180,16 +185,15 @@ class ActivityTracker:
         """Add one frame at time ``t`` (seconds) and return the current flags."""
         if isinstance(t, bool) or not isinstance(t, (int, float)) or not math.isfinite(t):
             raise ValueError(f"ActivityTracker.update t must be finite, got {t!r}")
-        if self._last_t is not None and t < self._last_t:
-            raise ValueError(f"ActivityTracker.update t must not go backwards: {self._last_t} -> {t}")
-        self._last_t = t
-        p = self.params
-
+        if self._last_t is not None and t <= self._last_t:
+            raise ValueError(f"ActivityTracker.update t must increase: {self._last_t} -> {t}")
         trunk = arm = None
         if angles is not None:
             trunk = _deg("angles.trunk_flex", angles.trunk_flex)
             arms = [_deg(f"angles.upper_arm[{i}]", a) for i, a in enumerate(angles.upper_arm)]
             arm = max((d for d in arms if d is not None), default=None)
+        self._last_t = t  # all input checked; state changes from here on
+        p = self.params
 
         if trunk is not None:
             self._trunk.add(t, trunk, p)

@@ -12,7 +12,7 @@ States:
     :class:`Event`, and the detector is IDLE again.
 
 The event ends at the last sample above; peak and drivers are tracked from the
-start of PENDING. Time is in seconds and must not go backwards.
+start of PENDING. Time is in seconds and must strictly increase.
 """
 
 from __future__ import annotations
@@ -102,9 +102,13 @@ class EventDetector:
         """Add one sample at time ``t`` (seconds); returns the event when it closes."""
         if isinstance(t, bool) or not isinstance(t, (int, float)) or not math.isfinite(t):
             raise ValueError(f"EventDetector.update t must be finite, got {t!r}")
-        if self._last_t is not None and t < self._last_t:
-            raise ValueError(f"EventDetector.update t must not go backwards: {self._last_t} -> {t}")
-        self._last_t = t
+        if self._last_t is not None and t <= self._last_t:
+            raise ValueError(f"EventDetector.update t must increase: {self._last_t} -> {t}")
+        if score is not None:
+            total = score.total
+            if isinstance(total, bool) or not isinstance(total, int) or not 1 <= total <= 15:
+                raise ValueError(f"score.total must be an int 1..15, got {total!r}")
+        self._last_t = t  # all input checked; state changes from here on
         above = score is not None and score.total >= self.params.enter_total
 
         if self._state == _IDLE:

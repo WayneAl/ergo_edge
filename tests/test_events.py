@@ -1,4 +1,7 @@
 from dataclasses import replace
+
+import pytest
+
 from linesafe.events import EventDetector
 from linesafe.reba import RebaScore, Band
 
@@ -45,3 +48,36 @@ def test_flush_closes_active_only():
     assert d.active and d.flush().peak == 9 and not d.active
     d2 = EventDetector("S1"); feed(d2, [(1, 9)])
     assert d2.flush() is None
+
+def test_total_exactly_enter_total_opens():
+    d = EventDetector("S1"); feed(d, [(3.5, 8)])
+    assert d.active
+
+def test_peak_keeps_drivers_of_first_occurrence():
+    d = EventDetector("S1"); t = 0.0; closed = []
+    for seconds, total, drivers in [(1, 8, ("low",)), (2, 9, ("first",)), (2, 9, ("second",)), (3.2, 5, ("x",))]:
+        for _ in range(int(round(seconds * FPS))):
+            e = d.update(t, sc(total, drivers))
+            if e: closed.append(e)
+            t += 1 / FPS
+    assert len(closed) == 1 and closed[0].peak == 9 and closed[0].drivers == ("first",)
+
+def test_total_out_of_range_raises_before_state_change():
+    d = EventDetector("S1"); feed(d, [(4, 9)])                # active; last t = 119/30
+    for bad in (0, 16, True, 9.0):
+        with pytest.raises(ValueError, match=r"score\.total"):
+            d.update(4.0, replace(BASE, total=bad))
+    assert d.active and d.update(4.0, sc(9)) is None and d.active   # t = 4.0 was not consumed
+    idle = EventDetector("S1")
+    with pytest.raises(ValueError, match=r"score\.total"):
+        idle.update(0.0, replace(BASE, total=16))
+    feed(idle, [(3.5, 5)])
+    assert not idle.active and idle.flush() is None
+
+def test_time_must_strictly_increase():
+    d = EventDetector("S1")
+    d.update(1.0, sc(9))
+    for t in (1.0, 0.5, float("inf")):
+        with pytest.raises(ValueError, match="t must"):
+            d.update(t, sc(9))
+    assert d.update(1.1, sc(9)) is None

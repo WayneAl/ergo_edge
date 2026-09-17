@@ -1,3 +1,7 @@
+import sqlite3
+
+import pytest
+
 from linesafe.events import Event
 from linesafe.reba import Band
 from linesafe.store import EventStore
@@ -23,3 +27,17 @@ def test_reader_sees_writer(tmp_path):
     p = tmp_path / "a.db"; w = EventStore(p); r = EventStore(p)
     w.add_event(ev(1))
     assert len(r.events()) == 1
+
+class _NoWalConnection(sqlite3.Connection):
+    """A filesystem where SQLite cannot switch to WAL: the pragma just reports the current mode."""
+    def execute(self, sql, *args):
+        if sql.upper().replace(" ", "") == "PRAGMAJOURNAL_MODE=WAL":
+            sql = "PRAGMA journal_mode"
+        return super().execute(sql, *args)
+
+def test_file_database_without_wal_raises(tmp_path, monkeypatch):
+    EventStore(":memory:").close()                            # in-memory databases have no WAL; allowed
+    real_connect = sqlite3.connect
+    monkeypatch.setattr(sqlite3, "connect", lambda *a, **k: real_connect(*a, factory=_NoWalConnection, **k))
+    with pytest.raises(RuntimeError, match="WAL"):
+        EventStore(tmp_path / "a.db")

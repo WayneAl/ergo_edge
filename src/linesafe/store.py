@@ -1,6 +1,7 @@
 """SQLite store for closed High-risk events and the latest per-station status.
 
-One file, WAL journal so a dashboard process can read while the pipeline writes.
+One file, WAL journal so a dashboard process can read while the pipeline writes;
+a file database that SQLite cannot switch to WAL raises ``RuntimeError``.
 Every write commits immediately. The connection may be shared across threads
 (``check_same_thread=False``); a lock serialises its use. ``drivers`` is stored as
 a JSON list and returned as a list.
@@ -58,7 +59,10 @@ class EventStore:
         self._conn = sqlite3.connect(str(path), check_same_thread=False, isolation_level=None)
         self._conn.row_factory = sqlite3.Row
         with self._lock:
-            self._conn.execute("PRAGMA journal_mode=WAL")
+            mode = self._conn.execute("PRAGMA journal_mode=WAL").fetchone()[0]
+            if str(path) not in ("", ":memory:") and str(mode).lower() != "wal":
+                self._conn.close()
+                raise RuntimeError(f"EventStore needs WAL journal mode for {path}, SQLite reports {mode!r}")
             self._conn.executescript(_SCHEMA)
 
     def add_event(self, e: Event) -> int:
