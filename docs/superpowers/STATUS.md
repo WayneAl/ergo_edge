@@ -2,7 +2,7 @@
 
 ## Plans
 - 🟡 DRAFT DONE — Stage I proposal deck: `deck/dist/proposal.pdf` via `make pdf` (18 body + 3 appendix), reviewed and fact-checked. `make check` blocks final only on slide 12's prototype-evidence TODO. No UGen300 before Stage I (finalist unit only); slide 12 cites Hailo's published Hailo-10H FPS.
-- ⏳ DESIGN — laptop prototype (sub-project 2): `docs/superpowers/specs/2026-09-17-laptop-prototype-design.md` (awaiting approval of open decisions A–E)
+- 🔨 EXECUTING — laptop prototype (sub-project 2): spec `docs/superpowers/specs/2026-09-17-laptop-prototype-design.md` (decisions locked) → plan `docs/superpowers/plans/2026-09-17-laptop-prototype.md` (9 subagent tasks + Task 10 live session with Wayne), branch `prototype` in `.claude/worktrees/prototype`, ledger `.claude/sdd/2026-09-17-laptop-prototype/progress.md`
 
 ## What's next
 - Sub-project 1: Stage I proposal deck (English PDF, ≤20 body pages).
