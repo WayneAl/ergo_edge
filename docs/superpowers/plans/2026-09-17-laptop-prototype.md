@@ -788,7 +788,9 @@ class EventDetector:
     def update(self, t: float, score: RebaScore | None) -> Event | None   # returns the event when it closes
     def flush(self) -> Event | None                                        # closes an active event; pending -> None
 ```
-States: IDLE → (above) PENDING(start=t) → (above and `t - start >= enter_s`) ACTIVE. PENDING and not above → IDLE.
+States: IDLE → (above) PENDING(start=t) → (above and `t - start >= enter_s`) ACTIVE. PENDING and not above for longer
+than `pending_grace_s` (default 0.5, added to `EventParams` after the Task 8 review: a single dropped detection early in a
+High posture must not restart the event) → IDLE; a shorter below run keeps `start`.
 ACTIVE: above → `last_above = t`, clear `below_since`, track peak; not above → `below_since = below_since or t`;
 `t - below_since >= exit_s` → close and return the Event, go IDLE. `above = score is not None and score.total >= enter_total`.
 Peak/drivers tracking starts at PENDING start.
@@ -1083,7 +1085,7 @@ BAND_BGR: dict[Band, tuple[int, int, int]]   # negligible/low (87,139,46), mediu
 def draw(frame_bgr: np.ndarray, result: FrameResult, cfg: StationConfig, fps: float) -> np.ndarray   # draws in place, returns frame
 ```
 `Pipeline.step`: `dets = backend.infer(frame_bgr, idx)` → `pose = tracker.update(t, dets)`; pose None → view None,
-angles None, reba/rula None; else `view = classify_view(pose, params.geometry)`, wrong-view debounce (FRONT since ≥ `wrong_view_s` →
+angles None, reba/rula None; else `view = classify_view(pose, params.geometry)`, wrong-view debounce (a frame without a pose neither advances nor resets it; FRONT since ≥ `wrong_view_s` →
 True; any SIDE resets), `angles = compute_angles(pose, params.geometry, view_ok=(view is View.SIDE))` —
 every FRONT frame is unscored immediately (the twist proxy and flexion angles are meaningless from the front; amended after
 the Task 8 render review showed a front pose scored "trunk twist" during the debounce); `wrong_view` only decides when the
@@ -1103,11 +1105,17 @@ with the current total outlined; a 12 px red frame border while `event_active`; 
 when `wrong_view`; `no person in view` when pose None; `FPS <x.x>` top-right, red when `0 < fps < 15`.
 
 CLI (`typer`, `app = typer.Typer(no_args_is_help=True)`):
+- `linesafe record --source TEXT (camera index, default "0") --out PATH --seconds FLOAT` — raw capture with no pose
+  inference; stores each frame's `time.monotonic()` and writes the mp4 at the MEASURED rate `(n - 1) / (t_last - t_first)`
+  plus a `<out>.timestamps.json` sidecar, so a recorded session replays on its true timeline (added after the Task 8 review:
+  writing at the camera's reported fps while inference slows the loop compresses every duration).
 - `linesafe run --source TEXT (camera index or video path, default "0") --station PATH --backend ultralytics|hailo
-  --device TEXT? --db PATH (default linesafe.db) --record PATH?` — opens `cv2.VideoCapture`, `t = time.monotonic()` per
+  --device TEXT? --db PATH (default linesafe.db)` (no `--record`; use `record`) — for a video-file source `t = idx / fps`
+  of the file; for a camera, opens `cv2.VideoCapture`, `t = time.monotonic()` per
   frame (activity, events and tracker all reject time that goes backwards; wall-clock can jump on an NTP sync), the
   Pipeline gets `wall_offset = time.time() - time.monotonic()` captured once at start, FPS = exponential moving average of 1/dt (α 0.1), `overlay.draw`, `cv2.imshow("LineSafe", …)`; key `s` saves
-  `pilot/<station>_<YYYYmmdd-HHMMSS-fff>.png` (drawn frame) and `.json` (`t`, angles as degrees or reason strings,
+  `pilot/<station>_<YYYYmmdd-HHMMSS-fff>_raw.png` (the frame BEFORE drawing — the pilot rater measures on this one),
+  `…png` (drawn frame) and `.json` (`t`, angles as degrees or reason strings,
   `reba` parts/total/band, `rula` parts/total/level); key `q` or ESC quits; `--record` writes the raw frames to mp4 at the
   capture's fps. On exit: `pipeline.close()`, `backend.close()`, release capture/writer, destroy windows. Exit 1 on
   backend errors, 2 on a bad station file (message on stderr).
@@ -1187,10 +1195,11 @@ the rest of the package never imports it); routes:
 Held back because it needs a camera and a person. The orchestrator prepares, Wayne performs.
 1. FPS: `uv run linesafe run --source 0 --station stations/example.toml` with the 1080p webcam; note the steady FPS.
 2. Scripted session (≈ 2 min, side view, box ≤ 10 kg): upright 10 s → bend to pick up 10 s → hold bent 10 s → upright
-   10 s → arms raised overhead 10 s → squat 10 s → one-leg stance 5 s; record with `--record session.mp4`.
+   10 s → arms raised overhead 10 s → squat 10 s → one-leg stance 5 s; record with
+   `linesafe record --source 0 --out session.mp4 --seconds 90` (true timeline).
 3. `uv run linesafe extract session.mp4 --out tests/fixtures/session.keypoints.json`; replay it; commit keypoints +
    `tests/golden/session.results.json` + `tests/test_golden.py` (replay equals golden; no torch).
 4. Pilot check: 20 postures held 5 s, `s` pressed each time; Wayne measures trunk/neck/upper-arm/elbow/knee on the saved
-   PNGs with a protractor tool and fills the REBA worksheet by hand; orchestrator computes per-angle error and REBA
+   `_raw.png` files (no overlay, so the system's numbers cannot anchor the rater) with a protractor tool and fills the REBA worksheet by hand; orchestrator computes per-angle error and REBA
    exact-match rate into `docs/evidence/2026-10-pilot-check.md`, which feeds deck slide 12.
 5. `linesafe web` on the laptop, phone on the same Wi-Fi opens `http://<laptop-ip>:8080` — screenshot for the video.
