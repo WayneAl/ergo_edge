@@ -2,8 +2,8 @@
 
 ``run`` scores a live camera and shows the overlay window, ``replay`` runs the same
 pipeline from a keypoints file (no camera, no torch), ``extract`` turns a video into a
-keypoints file. Heavy imports happen inside the commands; OpenCV windows are opened only
-by ``run``.
+keypoints file, ``web`` serves the LAN dashboard over the event store. Heavy imports happen
+inside the commands; OpenCV windows are opened only by ``run``.
 
 Exit codes: 1 on backend or input-file errors, 2 on a bad station file or bad options.
 """
@@ -310,3 +310,26 @@ def extract(
         pose_backend.close()
     save_keypoints(out, raw)
     typer.echo(f"frames={raw.n} fps={raw.fps:.3f} size={raw.width}x{raw.height} -> {out}")
+
+
+@app.command()
+def web(
+    db: Path = typer.Option(Path("linesafe.db"), help="SQLite event store."),
+    host: str = typer.Option("0.0.0.0", help="Interface to listen on; 0.0.0.0 serves the whole LAN."),
+    port: int = typer.Option(8080, min=1, max=65535, help="TCP port."),
+) -> None:
+    """Serve the dashboard (station status, today's events, weekly summary) to phones on the LAN."""
+    try:
+        import fastapi  # noqa: F401
+        import uvicorn
+    except ImportError as exc:
+        raise _fail(f"install the web extra: uv sync --extra web ({exc})", 1) from exc
+    import sqlite3
+
+    from .web import create_app
+
+    try:
+        dashboard = create_app(db)
+    except (sqlite3.Error, RuntimeError) as exc:
+        raise _fail(f"cannot open event store {db}: {exc}", 1) from exc
+    uvicorn.run(dashboard, host=host, port=port)
