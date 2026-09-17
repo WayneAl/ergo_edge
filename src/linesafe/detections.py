@@ -119,7 +119,12 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def save_keypoints(path: Path, raw: RawDetections) -> None:
-    """Write ``raw`` as a version-1 keypoints file (see the plan's format)."""
+    """Write ``raw`` as a version-1 keypoints file.
+
+    Fields: ``version``, ``source``, ``fps``, ``width``, ``height``,
+    ``backend`` and ``frames`` — one list per frame holding every detection
+    as ``{kpts, conf, bbox, score}``.
+    """
     frames = [
         [
             {

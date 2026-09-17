@@ -30,8 +30,8 @@ from typing import Any
 
 import numpy as np
 
-from ..keypoints import N_KPTS
 from ..detections import Detection
+from ..keypoints import N_KPTS
 
 #: yolov8-pose raw head: 4 box + 1 score + 17*3 keypoint channels.
 _POSE_CHANNELS = 4 + 1 + N_KPTS * 3

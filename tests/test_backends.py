@@ -11,8 +11,11 @@ from linesafe.detections import Detection, RawDetections, save_keypoints
 from linesafe.keypoints import N_KPTS
 
 
-def _three_frame_keypoints(tmp_path: Path) -> Path:
-    """Write a synthetic 3-frame keypoints file (2, 1 and 0 people)."""
+def _three_frame_keypoints(tmp_path: Path) -> tuple[Path, RawDetections]:
+    """Write a synthetic 3-frame keypoints file (2, 1 and 0 people).
+
+    Returns the file and the in-memory detections that were written to it.
+    """
     rng = np.random.default_rng(0)
 
     def det() -> Detection:
@@ -33,24 +36,32 @@ def _three_frame_keypoints(tmp_path: Path) -> Path:
     )
     path = tmp_path / "synthetic.keypoints.json"
     save_keypoints(path, raw)
-    return path
+    return path, raw
 
 
 def test_replay_backend_returns_file_detections(tmp_path):
-    backend = make_backend("replay", keypoints_path=_three_frame_keypoints(tmp_path))
+    path, raw = _three_frame_keypoints(tmp_path)
+    backend = make_backend("replay", keypoints_path=path)
 
     assert backend.name == "replay"
     assert isinstance(backend, ReplayBackend)
 
     dets = backend.infer(None, 0)
-    assert len(dets) >= 1
+    assert len(dets) == len(raw.frames[0]) == 2
     assert dets[0].kpts.shape == (N_KPTS, 2)
     assert dets[0].conf.shape == (N_KPTS,)
     assert 0.0 <= dets[0].score <= 1.0
+    for written, replayed in zip(raw.frames[0], dets):
+        # save_keypoints rounds pixels to 2 decimal places
+        assert np.allclose(replayed.kpts, written.kpts, atol=1e-2)
+
+    # frame 2 was written with nobody in it
+    assert backend.infer(None, 2) == []
 
 
 def test_replay_backend_index_error_past_end(tmp_path):
-    backend = ReplayBackend(_three_frame_keypoints(tmp_path))
+    path, _ = _three_frame_keypoints(tmp_path)
+    backend = ReplayBackend(path)
 
     assert backend.raw.n == 3
     with pytest.raises(IndexError):

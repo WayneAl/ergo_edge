@@ -39,6 +39,18 @@ def test_detection_validates_shape():
         Detection(np.zeros((16, 2)), np.zeros(17), (0, 0, 1, 1), 1.0)
 
 
+def test_detection_validates_conf_and_bbox():
+    with pytest.raises(ValueError, match="Detection.conf"):
+        Detection(np.zeros((17, 2)), np.zeros(16), (0, 0, 1, 1), 1.0)
+    with pytest.raises(ValueError, match="bbox"):
+        Detection(np.zeros((17, 2)), np.zeros(17), (0, 0, 1), 1.0)
+
+    # float64 in, float32 stored
+    det = Detection(np.zeros((17, 2)), np.zeros(17), (0, 0, 1, 1), 1.0)
+    assert det.kpts.dtype == np.float32
+    assert det.conf.dtype == np.float32
+
+
 def test_load_keypoints_validates_header(tmp_path):
     payload = {
         "version": 1,
@@ -92,4 +104,5 @@ def test_keypoints_roundtrip(tmp_path):
         for a, b in zip(a_dets, b_dets):
             assert np.allclose(a.kpts, b.kpts, atol=1e-2)
             assert np.allclose(a.conf, b.conf, atol=1e-2)
+            assert np.allclose(a.bbox, b.bbox, atol=1e-2)
             assert b.score == pytest.approx(a.score, abs=1e-2)

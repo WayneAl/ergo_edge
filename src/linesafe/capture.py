@@ -7,8 +7,8 @@ frame, producing exactly what a keypoints file holds.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from .backends.base import PoseBackend
 from .detections import Detection, RawDetections

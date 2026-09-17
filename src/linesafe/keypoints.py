@@ -36,8 +36,8 @@ NAMES: list[str] = [
 ]
 
 #: Index permutation that swaps every left/right pair; NOSE maps to itself.
-#: Used when mirroring a left-handed golfer so that all downstream code can
-#: assume a right-handed swing.
+#: Unused in LineSafe v1: no mirroring is performed, so left and right always
+#: mean the person's own sides as the pose model reports them.
 LR_SWAP: list[int] = [
     NOSE,
     R_EYE,
@@ -58,11 +58,8 @@ LR_SWAP: list[int] = [
     L_ANKLE,
 ]
 
-#: Drawing edges (19) used by the renderer. These are the COCO edges with one
-#: golf-specific substitution: COCO's (L_EYE, R_EYE) edge is dropped — it adds
-#: nothing at swing scale — and (L_WRIST, R_WRIST) takes its place, because both
-#: hands hold the club, so that segment is the closest thing to a shaft line the
-#: pose model gives us.
+#: Drawing edges (19) used by the overlay: the standard COCO person skeleton,
+#: with no edges added or removed.
 SKELETON: list[tuple[int, int]] = [
     (NOSE, L_EYE),
     (NOSE, R_EYE),
@@ -82,13 +79,13 @@ SKELETON: list[tuple[int, int]] = [
     (R_HIP, R_KNEE),
     (L_KNEE, L_ANKLE),
     (R_KNEE, R_ANKLE),
-    (L_WRIST, R_WRIST),
+    (L_EYE, R_EYE),
 ]
 
 # --- Lead / trail aliases ---------------------------------------------------
-# After build_track the golfer is always right-handed (left-handers are mirrored
-# and L/R swapped), so the lead side (closer to the target) is always LEFT and
-# the trail side is always RIGHT.
+# Unused in LineSafe v1. These are fixed aliases (lead = LEFT, trail = RIGHT)
+# carrying no handedness guarantee: no mirroring is performed, so nothing makes
+# the "lead" side the one a person actually leads with.
 LEAD_SHOULDER, LEAD_ELBOW, LEAD_WRIST, LEAD_HIP, LEAD_KNEE, LEAD_ANKLE = (
     L_SHOULDER,
     L_ELBOW,
