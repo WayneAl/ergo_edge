@@ -21,6 +21,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+from . import reba
 from .config import StationConfig
 from .geometry import LEFT, RIGHT, Angles, Measured, Missing
 from .reba import _finite, _flag, lower_arm_score, upper_arm_score
@@ -63,9 +64,10 @@ def rula_neck_score(flex_deg: float) -> int:
 def rula_trunk_score(flex_deg: float, twisted: bool) -> int:
     f = _finite("trunk flex_deg", flex_deg)
     twisted = _flag("trunk twisted", twisted)
-    if abs(f) <= 5:
+    tol = reba.UPRIGHT_TOL_DEG  # shared with REBA so a calibrated tolerance moves both
+    if abs(f) <= tol:
         s = 1
-    elif 5 < f <= 20 or f < -5:
+    elif tol < f <= 20 or f < -tol:
         s = 2
     elif 20 < f <= 60:
         s = 3

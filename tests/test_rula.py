@@ -1,6 +1,7 @@
 import pytest
 from linesafe.config import StationConfig
 from linesafe.geometry import Angles, Measured, Missing, View
+from linesafe import reba as R
 from linesafe import rula as U
 
 def angles(trunk=0.0, twisted=False, neck=0.0, ua=(0.0, 0.0), la=(0.0, 0.0), bilateral=True):
@@ -105,11 +106,11 @@ def test_wrist_twist_from_station():
 
 def test_missing_neck_is_partial():
     s = U.score_rula(angles(neck=Missing("no confident ear")), CFG)
-    assert s.parts["neck"] == 1 and s.partial is True and "neck" in s.missing
+    assert s.parts["neck"] == 1 and s.partial is True and s.missing == ("neck",)
 
 def test_missing_legs_is_partial():
     s = U.score_rula(angles(bilateral=Missing("ankle not confident")), CFG)
-    assert s.parts["legs"] == 1 and s.partial is True and "legs" in s.missing
+    assert s.parts["legs"] == 1 and s.partial is True and s.missing == ("legs",)
 
 def test_missing_twist_is_listed_not_partial():
     s = U.score_rula(angles(twisted=Missing("hips not confident")), CFG)
@@ -117,7 +118,7 @@ def test_missing_twist_is_listed_not_partial():
 
 def test_no_upper_arm_is_partial_side_none():
     s = U.score_rula(angles(ua=(Missing("x"), Missing("y")), la=(90, 90)), CFG)
-    assert s.side == "none" and (s.parts["upper_arm"], s.parts["lower_arm"]) == (1, 2)
+    assert s.side == "none" and (s.parts["upper_arm"], s.parts["lower_arm"]) == (1, 2) and s.score_a == 2
     assert s.partial is True and s.missing == ("upper arm",)
 
 def test_chosen_side_lower_arm_missing_is_partial():
@@ -145,3 +146,20 @@ def test_larger_table_a_beats_larger_flexion(ua, la, side):
     # 40 deg: upper2 lower2 -> A 3; 44 deg: upper2 lower1 -> A 2
     s = U.score_rula(angles(ua=ua, la=la), CFG)
     assert s.side == side and (s.parts["upper_arm"], s.parts["lower_arm"], s.score_a) == (2, 2, 3)
+
+# --- Fix round 1: C2 shared upright tolerance, I1 one-leg scenario ---
+
+def test_trunk_bands_follow_reba_upright_tolerance(monkeypatch):
+    monkeypatch.setattr(R, "UPRIGHT_TOL_DEG", 3.0)
+    assert U.rula_trunk_score(4.0, False) == 2 and U.rula_trunk_score(-4.0, False) == 2
+    assert U.rula_trunk_score(3.0, False) == 1 and U.rula_trunk_score(-3.0, False) == 1
+
+def test_scenario_one_leg_twisted_muscle_use():
+    cfg = StationConfig(station_id="S1", rula_wrist=2, rula_force=1)
+    s = U.score_rula(angles(trunk=10, twisted=True, neck=15, ua=(50, 55), la=(120, 70), bilateral=False), cfg,
+                     muscle_use=True)
+    # left upper3 lower2 wrist2 twist1 -> A 4; right upper3 lower1 -> A 4; tie -> 55 > 50 right; 4 + 1 + 1 = 6
+    # neck2 trunk2+1=3 legs2 -> B 5 + 1 + 1 = 7; C[6][7] = 7
+    assert (s.score_a, s.score_b, s.total, s.side) == (6, 7, 7, "right")
+    assert s.parts == {"upper_arm": 3, "lower_arm": 1, "wrist": 2, "wrist_twist": 1, "neck": 2, "trunk": 3,
+                       "legs": 2, "muscle": 1, "force": 1}
