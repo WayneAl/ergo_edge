@@ -75,8 +75,8 @@ def _iou(
     iw = min(a[2], b[2]) - max(a[0], b[0])
     ih = min(a[3], b[3]) - max(a[1], b[1])
     inter = max(0.0, iw) * max(0.0, ih)
-    area_a = abs(a[2] - a[0]) * abs(a[3] - a[1])
-    area_b = abs(b[2] - b[0]) * abs(b[3] - b[1])
+    area_a = (a[2] - a[0]) * (a[3] - a[1])
+    area_b = (b[2] - b[0]) * (b[3] - b[1])
     union = area_a + area_b - inter
     return inter / union if union > 0 else 0.0
 
@@ -119,6 +119,7 @@ class Tracker:
         self._locked = False
         self._last_bbox: tuple[float, float, float, float] | None = None
         self._last_matched_t: float | None = None
+        self._last_t: float | None = None  # last t passed to update, any call
         self._reset_keypoints()
 
     @property
@@ -170,31 +171,67 @@ class Tracker:
         """Process one frame's detections at time ``t`` (seconds).
 
         Returns the tracked person's smoothed pose, or ``None`` when nobody is
-        tracked this frame. Raises ``ValueError`` (from the 1€ filter) if a
-        frame that processes a detection does not advance time.
+        tracked this frame.
+
+        Raises ``ValueError``, before any tracker state changes, when ``t`` is
+        not finite or not strictly greater than the ``t`` of the previous call
+        (any call, with or without detections); when any detection's bbox is
+        not finite or has ``x2 < x1`` or ``y2 < y1`` (zero width or height is
+        allowed); or when the detection chosen this frame has a non-finite
+        confidence, or a non-finite keypoint that would be used (confident, or
+        output raw because nothing is held for it). A call that raised leaves
+        the tracker exactly as it was, so the next valid call behaves as if the
+        bad one never happened.
         """
         t = float(t)
         if not math.isfinite(t):
             raise ValueError(f"Tracker.update t must be finite, got {t}")
+        if self._last_t is not None and t <= self._last_t:
+            raise ValueError(
+                f"Tracker.update t must strictly increase: {self._last_t} -> {t}"
+            )
+        for d in dets:
+            x1, y1, x2, y2 = d.bbox
+            finite = all(math.isfinite(v) for v in d.bbox)
+            if not (finite and x1 <= x2 and y1 <= y2):
+                raise ValueError(
+                    "Detection.bbox must be finite with x1 <= x2 and y1 <= y2, "
+                    f"got {d.bbox}"
+                )
 
+        p = self.params
+        # Decide what this frame does without touching state.
         chosen: Detection | None = None
+        lost = False
         if self._locked:
             chosen = self._match(dets)
             if chosen is None:
                 assert self._last_matched_t is not None
-                if t - self._last_matched_t > self.params.lost_s:
-                    self._locked = False
-                    self._last_bbox = None
-                    self._last_matched_t = None
-                    self._reset_keypoints()
-                else:
-                    return None
-        if chosen is None:
+                lost = t - self._last_matched_t > p.lost_s
+        if chosen is None and (lost or not self._locked):
             chosen = self._seed(dets)
-            if chosen is None:
-                return None
+        if chosen is not None:
+            if not np.isfinite(chosen.conf).all():
+                raise ValueError(
+                    "Detection.conf must be finite for the tracked detection"
+                )
+            has_value = np.zeros(K.N_KPTS, bool) if lost else self._has_value
+            used = (chosen.conf >= p.conf_min) | ~has_value
+            if not np.isfinite(chosen.kpts[used]).all():
+                raise ValueError(
+                    "Detection.kpts must be finite for every keypoint the tracker uses"
+                )
 
-        p = self.params
+        # Validated: state changes from here on.
+        self._last_t = t
+        if lost:
+            self._locked = False
+            self._last_bbox = None
+            self._last_matched_t = None
+            self._reset_keypoints()
+        if chosen is None:
+            return None
+
         kpts = np.empty((K.N_KPTS, 2), np.float32)
         conf = np.empty(K.N_KPTS, np.float32)
         for k in range(K.N_KPTS):
