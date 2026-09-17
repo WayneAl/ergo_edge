@@ -984,6 +984,7 @@ Rules: upper arm = `reba.upper_arm_score(u, cfg.arm_supported)`; lower arm = `ru
 Side selection: the side with the larger `rula_table_a` value, ties → larger upper-arm flexion → left.
 Missing handling mirrors `score_reba`: trunk Missing → None; neck Missing → 1 + partial; legs Missing → 1 + partial;
 no Measured upper arm → upper 1, lower 2, side "none", partial; lower arm Missing on the chosen side → 2 + partial;
+exactly one upper arm Missing → `"upper arm <side>"` listed, not partial (same as `score_reba` after the Task 4 review);
 twist Missing → not twisted, listed, not partial. Worksheet note in the module docstring: muscle use uses
 "static > 10 min or repeated ≥ 4/min" (ErgoPlus and IEH agree), computed upstream in `activity.py`.
 
