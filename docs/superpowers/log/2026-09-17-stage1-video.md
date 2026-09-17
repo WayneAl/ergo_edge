@@ -30,5 +30,7 @@ Merged: `a957858` (branch `video`: c2bf82d, de4f380, 761dc11, 2ac7b0b, 015ae1f).
 - Footage not shot yet: `overlay_lift`, `phone_lift`, `overlay_offline`, `phone_offline`, `phone_dashboard` (guide above,
   same sitting as Task 10). After the shoot: tune in/out/crop, align narration with what the overlay really shows,
   full build, watch end to end, Wayne uploads unlisted to YouTube.
+- `site_replay` (18 s, source 0:41–0:59 of YouTube 27N3I5kvbjk): overlay fades to skeleton only; publish only after
+  the uploader's written permission (Wayne is handling it). Source and composite are gitignored under `video/footage/`.
 - Captions: leading punctuation and a dash at a line break are not shown; `\` is not escaped (none in the script).
 - `check_sources` uses container duration; a phone file with longer audio than video is caught only by `check_part`.

@@ -38,10 +38,10 @@ This is the prototype, running live on a laptop. In Stage Two, the same pipeline
 id = "lift_climb"
 clip = "video/footage/overlay_lift.mp4"
 in_s = 14.0
-out_s = 36.0
+out_s = 32.0
 pip = "video/footage/phone_lift.mp4"
 pip_in_s = 14.0
-pip_out_s = 36.0
+pip_out_s = 32.0
 narration = """
 Upright, the score is Low. As the trunk bends to reach the box, it climbs to Medium, then to High.
 """
@@ -49,11 +49,11 @@ Upright, the score is Low. As the trunk bends to reach the box, it climbs to Med
 [[shot]]
 id = "lift_alert"
 clip = "video/footage/overlay_lift.mp4"
-in_s = 36.0
-out_s = 56.0
+in_s = 32.0
+out_s = 50.0
 pip = "video/footage/phone_lift.mp4"
-pip_in_s = 36.0
-pip_out_s = 56.0
+pip_in_s = 32.0
+pip_out_s = 50.0
 narration = """
 Held in High for a few seconds, the posture raises an alert, and an event is stored with the angles that drove it.
 """
@@ -79,6 +79,19 @@ narration = """
 Back on the plant network, the safety manager opens the dashboard on a phone. Each event shows the station, the time,
 the peak score and the angles behind it. No video is stored and no one is identified. The system rates the task, not
 the person.
+"""
+
+# Public footage (YouTube 27N3I5kvbjk), composited by video/site_replay.sh.
+# Publish this video only after the uploader has given written permission.
+[[shot]]
+id = "site_replay"
+clip = "video/footage/site_replay.mp4"
+in_s = 0.0
+out_s = 18.0
+lead_s = 1.0
+narration = """
+The same engine, replayed offline on public footage of a tile carrier at a construction site. Once the skeleton is
+extracted, the image is thrown away, and the score comes from the skeleton alone.
 """
 
 [[shot]]

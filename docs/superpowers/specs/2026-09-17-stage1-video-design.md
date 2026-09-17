@@ -36,6 +36,8 @@ alert, network cable pulled and scoring continues · 4 dashboard on the phone ·
 - Narration longer than its clip → fail naming the shot. Footage is never sped up; narration is never cut.
 - Footage is real time: the overlay FPS is whatever was captured. Narration says the demo runs on the laptop today and on
   the UGen300 in Stage II — never implies the accelerator is in the shot.
+- A replay shot (`site_replay`, public footage via `video/site_replay.sh`) is labelled on screen as an offline replay,
+  hides the replay HUD's FPS figure, and needs the uploader's written permission before the video is published.
 - Every number spoken is a row in `deck/claims.md`; 🔴 rows are spoken as "we estimate".
 - Missing footage → fail naming the shot; `DRAFT=1` renders a labelled grey placeholder instead and writes
   `linesafe_stage1_DRAFT.mp4`, so a draft is never mistaken for the upload.
