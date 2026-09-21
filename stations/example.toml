@@ -1,0 +1,8 @@
+[station]
+id = "S1"
+reba_load = 1
+reba_coupling = 1
+reba_wrist = 2
+rula_wrist = 2
+rula_force = 1
+# roi = [0, 0, 1920, 1080]

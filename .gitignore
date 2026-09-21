@@ -13,3 +13,7 @@ data/
 video/build/
 video/dist/
 video/footage/
+pilot/
+*.db
+*.mp4
+yolov8*-pose.pt
