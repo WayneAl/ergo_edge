@@ -2,6 +2,8 @@
 name = "linesafe"
 version = "0.1.0"
 description = "Continuous REBA/RULA ergonomic risk scoring from pose estimation"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "numpy>=2",

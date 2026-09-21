@@ -17,3 +17,4 @@ pilot/
 *.db
 *.mp4
 yolov8*-pose.pt
+hackathon-topics.md
